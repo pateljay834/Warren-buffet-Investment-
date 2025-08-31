@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buffett Stock Research PWA</title>
-    <link rel="icon" href="icon-192.png" sizes="192x192">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" href="https://i.imgur.com/8p5Y7Zv.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/8p5Y7Zv.png">
     <meta name="theme-color" content="#007bff">
 
     <!-- Google Fonts -->
@@ -23,8 +23,8 @@
             "short_name": "Buffett Research",
             "name": "Warren Buffett Stock Research PWA",
             "icons": [
-                { "src": "icon-192.png", "type": "image/png", "sizes": "192x192" },
-                { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+                { "src": "https://i.imgur.com/8p5Y7Zv.png", "type": "image/png", "sizes": "192x192" },
+                { "src": "https://i.imgur.com/8p5Y7Zv.png", "type": "image/png", "sizes": "512x512" }
             ],
             "start_url": "/",
             "background_color": "#ffffff",
@@ -37,45 +37,53 @@
         document.head.innerHTML += `<link rel="manifest" href="${manifestURL}">`;
     </script>
 
-    <!-- Inline CSS for Wonderful UI -->
+    <!-- Inline CSS -->
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
         .container {
-            max-width: 1200px;
-            margin: auto;
+            max-width: 100%;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
         }
         h1 {
             text-align: center;
             color: #007bff;
             font-weight: 700;
+            font-size: 1.8em;
+            margin-bottom: 15px;
         }
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         #analyzeBtn {
             background: linear-gradient(45deg, #007bff, #0056b3);
             border: none;
             transition: all 0.3s ease;
+            font-size: 1.1em;
+            padding: 10px;
         }
         #analyzeBtn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
         }
         #result {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         .card {
             border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .nav-tabs .nav-link {
+            font-size: 0.9em;
+            padding: 8px 12px;
         }
         .nav-tabs .nav-link.active {
             background-color: #007bff;
@@ -83,15 +91,17 @@
             border-color: #007bff;
         }
         .tab-content {
-            padding: 20px;
+            padding: 15px;
             background: #f8f9fa;
             border-radius: 0 0 10px 10px;
         }
         .list-group-item {
-            border: none;
+            font-size: 0.9em;
+            padding: 8px 12px;
         }
         .badge {
-            font-size: 1em;
+            font-size: 0.9em;
+            padding: 6px 10px;
         }
         .spinner {
             display: none;
@@ -99,15 +109,25 @@
             margin-top: 20px;
         }
         #tradingview-chart {
-            height: 500px;
-            margin-top: 20px;
+            height: 400px;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #searchResults {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85em;
         }
         th, td {
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
         }
@@ -116,33 +136,70 @@
             color: white;
         }
         .news-item {
-            margin-bottom: 20px;
-            padding: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .news-title {
+        .news-title a {
             font-weight: bold;
             color: #007bff;
+            text-decoration: none;
+            font-size: 0.9em;
         }
-        .news-summary {
-            margin-top: 5px;
+        .news-title a:hover {
+            text-decoration: underline;
         }
-        .news-sentiment {
-            margin-top: 10px;
+        .news-summary, .news-sentiment {
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 8px;
+        }
+        .peer-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .peer-item {
+            background: #e9ecef;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            #analyzeBtn {
+                font-size: 1em;
+                padding: 8px;
+            }
+            #tradingview-chart {
+                height: 300px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-search-dollar me-2"></i>Buffett-Inspired Stock Research Tool</h1>
-        <p class="text-muted text-center">Comprehensive research for Indian stocks (NSE/BSE) based on Warren Buffett's principles. Includes fundamentals, financials, news, and charts. Powered by Alpha Vantage API.</p>
-        <p class="text-center">Enter symbol with .NS or .BSE (e.g., RELIANCE.NS or RELIANCE.BSE). BSE recommended for better support.</p>
+        <h1><i class="fas fa-search-dollar me-2"></i>Buffett Stock Research</h1>
+        <p class="text-muted text-center" style="font-size: 0.9em;">Analyze Indian stocks (BSE recommended) using Warren Buffett's principles. Enter symbol (e.g., RELIANCE.BSE) or search by name.</p>
         
         <div class="input-group">
             <span class="input-group-text"><i class="fas fa-search"></i></span>
-            <input type="text" class="form-control" id="stockSymbol" placeholder="Enter stock symbol (e.g., RELIANCE.NS)" required>
+            <input type="text" class="form-control" id="stockSymbol" placeholder="Enter symbol or name (e.g., RELIANCE.BSE)" required>
+        </div>
+        <div id="searchResults" class="list-group"></div>
+        <div class="input-group">
+            <label class="input-group-text"><i class="fas fa-exchange-alt"></i> Exchange</label>
+            <select class="form-select" id="exchange">
+                <option value="BSE">BSE (e.g., RELIANCE.BSE)</option>
+                <option value="NSE">NSE (e.g., RELIANCE.NS)</option>
+            </select>
         </div>
         <button class="btn btn-primary w-100" id="analyzeBtn"><i class="fas fa-analyze me-2"></i>Research Stock</button>
         
@@ -162,9 +219,9 @@
 
     <!-- Inline JavaScript -->
     <script>
-        const apiKey = 'WRSPEAQQ1P7XX0Q9';  // Your Alpha Vantage API key
+        const apiKey = 'WRSPEAQQ1P7XX0Q9'; // Your Alpha Vantage API key
 
-        // Service Worker for PWA
+        // Service Worker
         const swCode = `
             self.addEventListener('install', (event) => {
                 event.waitUntil(
@@ -196,44 +253,88 @@
             });
         }
 
+        // Symbol Search
+        const stockSymbolInput = document.getElementById('stockSymbol');
+        const searchResults = document.getElementById('searchResults');
+        stockSymbolInput.addEventListener('input', async () => {
+            const query = stockSymbolInput.value.trim();
+            const exchange = document.getElementById('exchange').value;
+            if (query.length < 3) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            try {
+                const res = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(query)}&apikey=${apiKey}`);
+                const data = await res.json();
+                if (data.bestMatches && data.bestMatches.length) {
+                    searchResults.innerHTML = data.bestMatches
+                        .filter(match => match['3. type'] === 'Equity' && (match['4. region'] === 'India' || match['1. symbol'].endsWith(`.${exchange}`)))
+                        .map(match => `<a href="#" class="list-group-item list-group-item-action" data-symbol="${match['1. symbol']}">${match['2. name']} (${match['1. symbol']})</a>`)
+                        .join('');
+                    searchResults.querySelectorAll('a').forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            stockSymbolInput.value = link.dataset.symbol;
+                            searchResults.innerHTML = '';
+                        });
+                    });
+                } else {
+                    searchResults.innerHTML = '<div class="list-group-item">No matching symbols found. Try BSE suffix (e.g., RELIANCE.BSE).</div>';
+                }
+            } catch (error) {
+                searchResults.innerHTML = `<div class="list-group-item text-danger">Error searching: ${error.message}. Check rate limits (5/min, 500/day).</div>`;
+            }
+        });
+
+        // Stock Analysis
         document.getElementById('analyzeBtn').addEventListener('click', async () => {
-            const symbol = document.getElementById('stockSymbol').value.trim();
+            const symbolInput = document.getElementById('stockSymbol').value.trim();
+            const exchange = document.getElementById('exchange').value;
             const resultDiv = document.getElementById('result');
             const spinner = document.getElementById('spinner');
             
-            if (!symbol) {
+            if (!symbolInput) {
                 resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a stock symbol.</div>';
                 return;
+            }
+
+            // Append exchange suffix
+            let symbol = symbolInput;
+            const suffix = exchange === 'BSE' ? '.BSE' : '.NS';
+            if (!symbol.endsWith('.BSE') && !symbol.endsWith('.NS')) {
+                symbol = `${symbol}${suffix}`;
+            } else if (symbol.endsWith('.NS') && exchange === 'BSE') {
+                symbol = symbol.replace('.NS', '.BSE');
+            } else if (symbol.endsWith('.BSE') && exchange === 'NSE') {
+                symbol = symbol.replace('.BSE', '.NS');
             }
             
             resultDiv.innerHTML = '';
             spinner.style.display = 'block';
+            searchResults.innerHTML = '';
             
             try {
-                // Fetch overview
+                // Fetch data with rate limit handling
                 const overviewRes = await fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`);
                 const overview = await overviewRes.json();
                 
-                if (!overview.Symbol) {
-                    throw new Error('Invalid symbol or no data available. Try BSE suffix (e.g., RELIANCE.BSE).');
+                if (!overview.Symbol || overview.Symbol === 'None' || overview.Error) {
+                    throw new Error('Invalid symbol or no data. Try BSE (e.g., RELIANCE.BSE) or search above.');
                 }
                 
-                // Fetch income statement
                 const incomeRes = await fetch(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${symbol}&apikey=${apiKey}`);
                 const income = await incomeRes.json();
                 
-                // Fetch balance sheet
                 const balanceRes = await fetch(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${symbol}&apikey=${apiKey}`);
                 const balance = await balanceRes.json();
                 
-                // Fetch news
                 const newsRes = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol.replace(/\..*/,'')}&apikey=${apiKey}`);
                 const news = await newsRes.json();
                 
                 // Extract metrics
-                const name = overview.Name;
-                const description = overview.Description;
-                const sector = overview.Sector;
+                const name = overview.Name || 'N/A';
+                const description = overview.Description || 'N/A';
+                const sector = overview.Sector || 'N/A';
                 const peRatio = parseFloat(overview.PERatio) || 'N/A';
                 const pbRatio = parseFloat(overview.PriceToBookRatio) || 'N/A';
                 const roe = parseFloat(overview.ReturnOnEquityTTM) || 'N/A';
@@ -286,39 +387,40 @@
                 else if (score >= 4) { suggestion = 'Hold/Buy'; badgeClass = 'bg-warning'; }
                 else { suggestion = 'Avoid/Sell'; badgeClass = 'bg-danger'; }
                 
-                // Financial Statements Tables
-                let incomeTable = '<table><thead><tr><th>Year</th><th>Revenue</th><th>Net Income</th><th>EPS</th></tr></thead><tbody>';
+                // Financial Tables
+                let incomeTable = '<table><thead><tr><th>Year</th><th>Revenue (Cr)</th><th>Net Income (Cr)</th><th>EPS</th></tr></thead><tbody>';
                 if (income.annualReports) {
-                    income.annualReports.forEach(report => {
-                        incomeTable += `<tr><td>${report.fiscalDateEnding}</td><td>${report.totalRevenue}</td><td>${report.netIncome}</td><td>${report.dilutedEPS}</td></tr>`;
+                    income.annualReports.slice(0, 5).forEach(report => {
+                        incomeTable += `<tr><td>${report.fiscalDateEnding}</td><td>${(parseFloat(report.totalRevenue) / 1e7).toFixed(2)}</td><td>${(parseFloat(report.netIncome) / 1e7).toFixed(2)}</td><td>${report.dilutedEPS}</td></tr>`;
                     });
                 }
                 incomeTable += '</tbody></table>';
                 
-                let balanceTable = '<table><thead><tr><th>Year</th><th>Total Assets</th><th>Total Liabilities</th><th>Equity</th></tr></thead><tbody>';
+                let balanceTable = '<table><thead><tr><th>Year</th><th>Assets (Cr)</th><th>Liabilities (Cr)</th><th>Equity (Cr)</th></tr></thead><tbody>';
                 if (balance.annualReports) {
-                    balance.annualReports.forEach(report => {
-                        balanceTable += `<tr><td>${report.fiscalDateEnding}</td><td>${report.totalAssets}</td><td>${report.totalLiabilities}</td><td>${report.totalShareholderEquity}</td></tr>`;
+                    balance.annualReports.slice(0, 5).forEach(report => {
+                        balanceTable += `<tr><td>${report.fiscalDateEnding}</td><td>${(parseFloat(report.totalAssets) / 1e7).toFixed(2)}</td><td>${(parseFloat(report.totalLiabilities) / 1e7).toFixed(2)}</td><td>${(parseFloat(report.totalShareholderEquity) / 1e7).toFixed(2)}</td></tr>`;
                     });
                 }
                 balanceTable += '</tbody></table>';
                 
                 // News
                 let newsSection = '';
-                if (news.feed) {
-                    news.feed.slice(0, 5).forEach(item => {
-                        newsSection += `
-                            <div class="news-item">
-                                <div class="news-title"><a href="${item.url}" target="_blank">${item.title}</a></div>
-                                <div class="news-summary">${item.summary}</div>
-                                <div class="news-sentiment">Sentiment: ${item.overall_sentiment_label} (Score: ${item.overall_sentiment_score})</div>
-                            </div>`;
-                    });
+                if (news.feed && news.feed.length) {
+                    newsSection = news.feed.slice(0, 5).map(item => `
+                        <div class="news-item">
+                            <div class="news-title"><a href="${item.url}" target="_blank">${item.title}</a></div>
+                            <div class="news-summary">${item.summary}</div>
+                            <div class="news-sentiment">Sentiment: ${item.overall_sentiment_label} (Score: ${item.overall_sentiment_score})</div>
+                        </div>`).join('');
                 } else {
                     newsSection = '<p>No recent news available.</p>';
                 }
                 
-                // Display with Tabs
+                // Peers (mock, as Alpha Vantage doesn't provide peers)
+                const peers = sector ? ['TCS.' + suffix, 'INFY.' + suffix, 'HDFCBANK.' + suffix].filter(p => p !== symbol) : [];
+                
+                // Render Tabs
                 resultDiv.innerHTML = `
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -358,6 +460,8 @@
                                     </ul>
                                     <h5>Buffett Analysis</h5>
                                     <ul class="list-group mb-3">${analysis}</ul>
+                                    <h5>Peers</h5>
+                                    <div class="peer-list">${peers.map(p => `<span class="peer-item">${p}</span>`).join('')}</div>
                                     <h5>Score: <span class="badge bg-primary">${score}/8</span></h5>
                                 </div>
                             </div>
@@ -376,8 +480,8 @@
                             <div id="tradingview-chart"></div>
                         </div>
                     </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle"></i> Not financial advice. Do your own research.
+                    <div class="alert alert-info mt-3" style="font-size: 0.85em;">
+                        <i class="fas fa-info-circle"></i> Not financial advice. BSE recommended due to NSE limitations. Wait 1–2 min if rate limit reached.
                     </div>
                 `;
                 
@@ -386,7 +490,7 @@
                 new TradingView.widget({
                     "container_id": "tradingview-chart",
                     "width": "100%",
-                    "height": 500,
+                    "height": 400,
                     "symbol": symbol.endsWith('.NS') ? `NSE:${chartSymbol}` : `BSE:${chartSymbol}`,
                     "interval": "D",
                     "timezone": "Asia/Kolkata",
@@ -403,7 +507,16 @@
                 
                 spinner.style.display = 'none';
             } catch (error) {
-                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}. Check symbol, API key, or rate limits (5/min, 500/day). Try BSE suffix if NSE fails.</div>`;
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger" style="font-size: 0.9em;">
+                        Error: ${error.message}. Try:
+                        <ul>
+                            <li>Using BSE suffix (e.g., RELIANCE.BSE) or search above.</li>
+                            <li>Waiting 1–2 min for rate limits (5/min, 500/day).</li>
+                            <li>Checking internet or trying a US VPN.</li>
+                            <li>Contact <a href="mailto:premium@alphavantage.co">Alpha Vantage support</a>.</li>
+                        </ul>
+                    </div>`;
                 spinner.style.display = 'none';
             }
         });
