@@ -3,1681 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buffett Stock Analyzer India</title>
-    <meta name="description" content="Analyze Indian stocks using Warren Buffett's investment principles with real-time data">
-    <meta name="theme-color" content="#1a365d">
-    <link rel="manifest" id="manifest">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzY2N2VlYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3NjRiYTIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMjAiLz4KICA8Y2lyY2xlIGN4PSI2NCIgY3k9IjY0IiByPSIyOCIgZmlsbD0iIzFhMzY1ZCIvPgogIDx0ZXh0IHg9IjY0IiB5PSI3MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+JDwvdGV4dD4KPC9zdmc+">
-    
+    <title>Buffett Stock Research PWA</title>
+    <link rel="icon" href="icon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Inline Manifest for PWA -->
+    <script>
+        const manifest = {
+            "short_name": "Buffett Research",
+            "name": "Warren Buffett Stock Research PWA",
+            "icons": [
+                { "src": "icon-192.png", "type": "image/png", "sizes": "192x192" },
+                { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+            ],
+            "start_url": "/",
+            "background_color": "#ffffff",
+            "theme_color": "#007bff",
+            "display": "standalone"
+        };
+        const stringManifest = JSON.stringify(manifest);
+        const blob = new Blob([stringManifest], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(blob);
+        document.head.innerHTML += `<link rel="manifest" href="${manifestURL}">`;
+    </script>
+
+    <!-- Inline CSS for Wonderful UI -->
     <style>
-        :root {
-            --primary: #667eea;
-            --primary-dark: #1a365d;
-            --secondary: #764ba2;
-            --success: #48bb78;
-            --warning: #ed8936;
-            --error: #e53e3e;
-            --info: #38b2ac;
-            --light: #f7fafc;
-            --dark: #2d3748;
-            --gray: #718096;
-            --border: #e2e8f0;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #4facfe, #00f2fe);
-            --gradient-3: linear-gradient(135deg, #a8edea, #fed6e3);
-            --gradient-4: linear-gradient(135deg, #ffecd2, #fcb69f);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--gradient-1);
-            min-height: 100vh;
-            padding: 10px;
-            color: var(--dark);
-            line-height: 1.6;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
         }
-
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary-dark), #2d5a87);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
-                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 100px 100px;
-            animation: float 30s infinite linear;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-            100% { transform: translateY(0px) rotate(360deg); }
-        }
-
-        .header h1 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 800;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .api-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            z-index: 10;
-        }
-
-        .api-live { background: var(--success); color: white; }
-        .api-fallback { background: var(--warning); color: white; }
-        .api-error { background: var(--error); color: white; }
-
-        .main-content {
-            padding: 50px 30px;
-        }
-
-        .buffett-principles {
-            background: var(--gradient-3);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 40px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .principles-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .principles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .principle-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 16px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .principle-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .principle-title {
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .principle-desc {
-            color: var(--gray);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .search-section {
-            background: var(--gradient-4);
-            border-radius: 20px;
-            padding: 35px;
-            margin-bottom: 40px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .search-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 280px;
-            padding: 18px 24px;
-            border: 3px solid transparent;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 500;
+            max-width: 1200px;
+            margin: auto;
             background: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .search-btn {
-            padding: 18px 32px;
-            background: var(--gradient-1);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
+        h1 {
+            text-align: center;
+            color: #007bff;
             font-weight: 700;
-            font-size: 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            min-width: 160px;
         }
-
-        .search-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        .input-group {
+            margin-bottom: 20px;
         }
-
-        .search-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        #analyzeBtn {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            transition: all 0.3s ease;
         }
-
-        .quick-stocks {
+        #analyzeBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+        #result {
+            margin-top: 30px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .tab-content {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+        }
+        .list-group-item {
+            border: none;
+        }
+        .badge {
+            font-size: 1em;
+        }
+        .spinner {
+            display: none;
+            text-align: center;
             margin-top: 20px;
         }
-
-        .quick-stocks p {
-            color: var(--gray);
-            margin-bottom: 15px;
-            font-weight: 600;
+        #tradingview-chart {
+            height: 500px;
+            margin-top: 20px;
         }
-
-        .quick-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
-
-        .quick-btn {
-            padding: 12px 18px;
-            background: rgba(102, 126, 234, 0.1);
-            border: 2px solid var(--primary);
-            border-radius: 25px;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
         }
-
-        .quick-btn:hover {
-            background: var(--primary);
+        th {
+            background-color: #007bff;
             color: white;
-            transform: translateY(-2px);
         }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: var(--primary);
+        .news-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
         }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(102, 126, 234, 0.2);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .news-title {
+            font-weight: bold;
+            color: #007bff;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .news-summary {
+            margin-top: 5px;
         }
-
-        .results {
-            display: none;
-            margin-top: 40px;
-            animation: fadeInUp 0.6s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .stock-header {
-            background: var(--gradient-2);
-            color: white;
-            padding: 35px;
-            border-radius: 20px;
-            margin-bottom: 35px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stock-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 2px, transparent 2px);
-            background-size: 80px 80px;
-            animation: float 25s infinite linear;
-        }
-
-        .stock-name {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 800;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stock-price {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            font-weight: 600;
-        }
-
-        .stock-meta {
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            font-weight: 500;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-            margin-bottom: 35px;
-        }
-
-        .metric-card {
-            background: white;
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            border: 2px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            opacity: 0;
-            animation: slideInUp 0.6s ease forwards;
-        }
-
-        .metric-card:nth-child(1) { animation-delay: 0.1s; }
-        .metric-card:nth-child(2) { animation-delay: 0.2s; }
-        .metric-card:nth-child(3) { animation-delay: 0.3s; }
-        .metric-card:nth-child(4) { animation-delay: 0.4s; }
-        .metric-card:nth-child(5) { animation-delay: 0.5s; }
-        .metric-card:nth-child(6) { animation-delay: 0.6s; }
-        .metric-card:nth-child(7) { animation-delay: 0.7s; }
-        .metric-card:nth-child(8) { animation-delay: 0.8s; }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-1);
-        }
-
-        .metric-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .metric-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .metric-value {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            line-height: 1.2;
-        }
-
-        .metric-description {
-            color: var(--gray);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .buffett-analysis {
-            background: var(--gradient-4);
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 35px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .analysis-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: center;
-            justify-content: center;
-        }
-
-        .score-container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .score-badge {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 1rem;
-            margin-left: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .score-excellent { background: var(--success); color: white; }
-        .score-good { background: var(--info); color: white; }
-        .score-fair { background: var(--warning); color: white; }
-        .score-poor { background: var(--error); color: white; }
-
-        .analysis-points {
-            list-style: none;
-            padding: 0;
-        }
-
-        .analysis-points li {
-            background: rgba(255, 255, 255, 0.9);
-            margin-bottom: 18px;
-            padding: 20px;
-            border-radius: 14px;
-            border-left: 5px solid var(--primary);
-            line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .verdict-container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 16px;
-            margin-top: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .error {
-            background: linear-gradient(135deg, #fed7d7, #feb2b2);
-            color: var(--error);
-            padding: 25px;
-            border-radius: 16px;
-            margin-top: 25px;
-            display: none;
-            font-weight: 600;
-            border: 2px solid rgba(229, 62, 62, 0.3);
-        }
-
-        .install-banner {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: var(--gradient-1);
-            color: white;
-            padding: 18px 24px;
-            border-radius: 16px;
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-            cursor: pointer;
-            z-index: 1000;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            display: none;
-        }
-
-        .install-banner:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 45px rgba(102, 126, 234, 0.5);
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 5px;
-            }
-
-            .main-content {
-                padding: 30px 20px;
-            }
-
-            .header {
-                padding: 30px 20px;
-            }
-
-            .search-container {
-                flex-direction: column;
-            }
-
-            .search-input {
-                min-width: auto;
-            }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .principles-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .buffett-principles,
-            .search-section,
-            .buffett-analysis {
-                padding: 25px 20px;
-            }
-
-            .install-banner {
-                bottom: 15px;
-                right: 15px;
-                padding: 15px 20px;
-            }
+        .news-sentiment {
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="api-status" id="apiStatus">🟢 Live Data</div>
-    
     <div class="container">
-        <div class="header">
-            <h1>📊 Buffett Stock Analyzer India</h1>
-            <p>Analyze Indian stocks using Warren Buffett's legendary investment principles with real-time market data</p>
+        <h1><i class="fas fa-search-dollar me-2"></i>Buffett-Inspired Stock Research Tool</h1>
+        <p class="text-muted text-center">Comprehensive research for Indian stocks (NSE/BSE) based on Warren Buffett's principles. Includes fundamentals, financials, news, and charts. Powered by Alpha Vantage API.</p>
+        <p class="text-center">Enter symbol with .NS or .BSE (e.g., RELIANCE.NS or RELIANCE.BSE). BSE recommended for better support.</p>
+        
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="stockSymbol" placeholder="Enter stock symbol (e.g., RELIANCE.NS)" required>
         </div>
-
-        <div class="main-content">
-            <div class="buffett-principles">
-                <h2 class="principles-title">🎯 Warren Buffett's Investment Philosophy</h2>
-                <div class="principles-grid">
-                    <div class="principle-card">
-                        <div class="principle-title">🛡️ Rule #1: Never Lose Money</div>
-                        <div class="principle-desc">Focus on capital preservation and avoid permanent loss of capital through careful analysis</div>
-                    </div>
-                    <div class="principle-card">
-                        <div class="principle-title">🧠 Understand the Business</div>
-                        <div class="principle-desc">Only invest in businesses within your circle of competence that you can analyze</div>
-                    </div>
-                    <div class="principle-card">
-                        <div class="principle-title">🏰 Strong Economic Moat</div>
-                        <div class="principle-desc">Look for sustainable competitive advantages that protect long-term profits</div>
-                    </div>
-                    <div class="principle-card">
-                        <div class="principle-title">👑 Quality Management</div>
-                        <div class="principle-desc">Invest in companies with honest, competent, and shareholder-friendly leadership</div>
-                    </div>
-                    <div class="principle-card">
-                        <div class="principle-title">💰 Attractive Valuation</div>
-                        <div class="principle-desc">Buy when the price is significantly below the company's intrinsic value</div>
-                    </div>
-                    <div class="principle-card">
-                        <div class="principle-title">⏰ Long-term Perspective</div>
-                        <div class="principle-desc">Hold great businesses for decades, benefiting from compound growth</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="search-section">
-                <div class="search-container">
-                    <input type="text" id="stockInput" class="search-input" placeholder="Enter NSE stock symbol (e.g., RELIANCE.NS, TCS.NS, INFY.NS)" />
-                    <button id="analyzeBtn" class="search-btn">🔍 Analyze Stock</button>
-                </div>
-                
-                <div class="quick-stocks">
-                    <p>📌 Quick Analysis - Popular Indian Blue Chips:</p>
-                    <div class="quick-buttons" id="quickButtons">
-                        <button class="quick-btn" onclick="quickAnalyze('RELIANCE.NS')">RELIANCE</button>
-                        <button class="quick-btn" onclick="quickAnalyze('TCS.NS')">TCS</button>
-                        <button class="quick-btn" onclick="quickAnalyze('INFY.NS')">INFY</button>
-                        <button class="quick-btn" onclick="quickAnalyze('HDFCBANK.NS')">HDFCBANK</button>
-                        <button class="quick-btn" onclick="quickAnalyze('ITC.NS')">ITC</button>
-                        <button class="quick-btn" onclick="quickAnalyze('HINDUNILVR.NS')">HINDUNILVR</button>
-                        <button class="quick-btn" onclick="quickAnalyze('ICICIBANK.NS')">ICICIBANK</button>
-                        <button class="quick-btn" onclick="quickAnalyze('BAJFINANCE.NS')">BAJFINANCE</button>
-                        <button class="quick-btn" onclick="quickAnalyze('ASIANPAINT.NS')">ASIANPAINT</button>
-                        <button class="quick-btn" onclick="quickAnalyze('MARUTI.NS')">MARUTI</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>🔍 Fetching real-time data and analyzing using Buffett's principles...</p>
-                <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">This may take a few moments</p>
-            </div>
-
-            <div class="error" id="error"></div>
-
-            <div class="results" id="results">
-                <div class="stock-header" id="stockHeader"></div>
-                <div class="metrics-grid" id="metricsGrid"></div>
-                <div class="buffett-analysis" id="buffettAnalysis"></div>
-            </div>
+        <button class="btn btn-primary w-100" id="analyzeBtn"><i class="fas fa-analyze me-2"></i>Research Stock</button>
+        
+        <div class="spinner" id="spinner">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted">Researching...</p>
         </div>
+        
+        <div id="result"></div>
     </div>
 
-    <div class="install-banner" id="installBanner" onclick="installPWA()">
-        📱 Install App
-    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+    <!-- TradingView Widget -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+
+    <!-- Inline JavaScript -->
     <script>
-        // Progressive Web App Manifest
-        const manifest = {
-            "name": "Buffett Stock Analyzer India",
-            "short_name": "Buffett Analyzer",
-            "description": "Analyze Indian stocks using Warren Buffett's investment principles",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#1a365d",
-            "theme_color": "#667eea",
-            "orientation": "portrait-primary",
-            "categories": ["finance", "productivity", "utilities"],
-            "lang": "en-US",
-            "icons": [
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzY2N2VlYSIvPgogICAgICA<c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3NjRiYTIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMjAiLz4KICA8Y2lyY2xlIGN4PSI2NCIgY3k9IjY0IiByPSIyOCIgZmlsbD0iIzFhMzY1ZCIvPgogIDx0ZXh0IHg9IjY0IiB5PSI3MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+JDwvdGV4dD4KPC9zdmc+",
-                    "sizes": "128x128",
-                    "type": "image/svg+xml"
-                },
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDUxMiIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzY2N2VlYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3NjRiYTIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQ1MTIpIiByeD0iODAiLz4KICA8Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjEyMCIgZmlsbD0iIzFhMzY1ZCIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjkwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMDAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+JDwvdGV4dD4KPC9zdmc+",
-                    "sizes": "512x512",
-                    "type": "image/svg+xml"
-                }
-            ]
-        };
+        const apiKey = 'WRSPEAQQ1P7XX0Q9';  // Your Alpha Vantage API key
 
-        // Set manifest
-        document.getElementById('manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+        // Service Worker for PWA
+        const swCode = `
+            self.addEventListener('install', (event) => {
+                event.waitUntil(
+                    caches.open('buffett-research-v1').then((cache) => {
+                        return cache.addAll([
+                            '/',
+                            '/index.html'
+                        ]);
+                    })
+                );
+            });
 
-        // Register Service Worker
+            self.addEventListener('fetch', (event) => {
+                event.respondWith(
+                    caches.match(event.request).then((response) => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swURL = URL.createObjectURL(swBlob);
+
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'buffett-analyzer-v2';
-                const urlsToCache = ['/'];
-                
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                            .then(cache => cache.addAll(urlsToCache))
-                    );
-                    self.skipWaiting();
-                });
-                
-                self.addEventListener('activate', event => {
-                    event.waitUntil(self.clients.claim());
-                });
-                
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                            .then(response => response || fetch(event.request))
-                    );
-                });
-            `;
-            
-            navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(swCode));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swURL)
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
         }
 
-        class BuffettStockAnalyzer {
-            constructor() {
-                // 🔑 ADD YOUR API KEYS HERE FOR PERSONAL USE
-                this.apiKeys = {
-                    // Alpha Vantage (Free: 5 calls/min, 500/day)
-                    alphaVantage: WRSPEAQQ1P7XX0Q9,
-                    
-                    // Finnhub (Free: 60 calls/min)
-                    finnhub: 'YOUR_FINNHUB_KEY_HERE',
-                    
-                    // Polygon.io (Free: 5 calls/min)
-                    polygon: 'YOUR_POLYGON_KEY_HERE',
-                    
-                    // Twelve Data (Free: 800 calls/day)
-                    twelveData: 'YOUR_TWELVE_DATA_KEY_HERE'
-                };
-                
-                this.apiEndpoints = {
-                    yahoo: 'https://query1.finance.yahoo.com/v8/finance/chart/',
-                    yahoo_fundamentals: 'https://query2.finance.yahoo.com/v10/finance/quoteSummary/',
-                    alphaVantage: 'https://www.alphavantage.co/query',
-                    finnhub: 'https://finnhub.io/api/v1/',
-                    polygon: 'https://api.polygon.io/v2/',
-                    twelveData: 'https://api.twelvedata.com/'
-                };
-                
-                this.cache = new Map();
-                this.rateLimiter = new Map();
-                this.initializeApp();
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const symbol = document.getElementById('stockSymbol').value.trim();
+            const resultDiv = document.getElementById('result');
+            const spinner = document.getElementById('spinner');
+            
+            if (!symbol) {
+                resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a stock symbol.</div>';
+                return;
             }
-
-            initializeApp() {
-                this.setupEventListeners();
-                this.setupPWAFeatures();
-                this.updateApiStatus('live');
-                this.initializeQuickButtons();
-                this.preloadPopularStocks();
-                this.showApiKeyStatus();
-            }
-
-            showApiKeyStatus() {
-                const hasApiKeys = Object.values(this.apiKeys).some(key => 
-                    key && key !== 'YOUR_ALPHA_VANTAGE_KEY_HERE' && key !== 'YOUR_FINNHUB_KEY_HERE' && 
-                    key !== 'YOUR_POLYGON_KEY_HERE' && key !== 'YOUR_TWELVE_DATA_KEY_HERE'
-                );
+            
+            resultDiv.innerHTML = '';
+            spinner.style.display = 'block';
+            
+            try {
+                // Fetch overview
+                const overviewRes = await fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`);
+                const overview = await overviewRes.json();
                 
-                if (hasApiKeys) {
-                    console.log('✅ API Keys configured - Using premium data sources');
-                    console.log('🔑 Available APIs:', Object.keys(this.apiKeys).filter(key => 
-                        this.apiKeys[key] && !this.apiKeys[key].includes('YOUR_')
-                    ));
-                    this.updateApiStatus('live');
-                    
-                    // Show debug info for Alpha Vantage
-                    if (this.apiKeys.alphaVantage && !this.apiKeys.alphaVantage.includes('YOUR_')) {
-                        console.log('🔑 Alpha Vantage key configured:', this.apiKeys.alphaVantage.substring(0, 8) + '...');
-                        this.testAlphaVantageConnection();
-                    }
-                } else {
-                    console.log('⚠️ No API keys found - Using Yahoo Finance + fallback data');
-                    console.log('💡 To add your API keys, edit the apiKeys object in the constructor');
-                    this.updateApiStatus('fallback');
+                if (!overview.Symbol) {
+                    throw new Error('Invalid symbol or no data available. Try BSE suffix (e.g., RELIANCE.BSE).');
                 }
-            }
-
-            async testAlphaVantageConnection() {
-                try {
-                    console.log('🧪 Testing Alpha Vantage connection...');
-                    const testUrl = `${this.apiEndpoints.alphaVantage}?function=SYMBOL_SEARCH&keywords=AAPL&apikey=${this.apiKeys.alphaVantage}`;
-                    const response = await fetch(testUrl);
-                    const data = await response.json();
-                    
-                    if (data.bestMatches) {
-                        console.log('✅ Alpha Vantage connection test successful!');
-                    } else if (data.Note) {
-                        console.warn('⚠️ Alpha Vantage rate limit detected:', data.Note);
-                    } else if (data.Information) {
-                        console.warn('⚠️ Alpha Vantage info:', data.Information);
-                    } else {
-                        console.warn('⚠️ Alpha Vantage test returned unexpected data:', data);
-                    }
-                } catch (error) {
-                    console.error('❌ Alpha Vantage connection test failed:', error);
-                }
-            }
-
-            setupEventListeners() {
-                document.getElementById('analyzeBtn').addEventListener('click', () => this.analyzeStock());
-                document.getElementById('stockInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.analyzeStock();
-                });
                 
-                document.getElementById('stockInput').addEventListener('input', (e) => {
-                    this.handleStockInputChange(e.target.value);
-                });
-
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                        e.preventDefault();
-                        this.analyzeStock();
-                    }
-                    if (e.key === 'Escape') {
-                        this.hideResults();
-                        this.hideError();
-                        document.getElementById('stockInput').value = '';
-                    }
-                });
-            }
-
-            setupPWAFeatures() {
-                let deferredPrompt;
+                // Fetch income statement
+                const incomeRes = await fetch(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${symbol}&apikey=${apiKey}`);
+                const income = await incomeRes.json();
                 
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    this.showInstallBanner();
-                });
-
-                window.installPWA = () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then(() => {
-                            deferredPrompt = null;
-                            this.hideInstallBanner();
-                        });
-                    }
-                };
-
-                // Network status
-                window.addEventListener('online', () => this.updateApiStatus('live'));
-                window.addEventListener('offline', () => this.updateApiStatus('error'));
-            }
-
-            updateApiStatus(status) {
-                const statusEl = document.getElementById('apiStatus');
-                const statusMap = {
-                    live: { text: '🟢 Live Data', class: 'api-live' },
-                    fallback: { text: '⚠️ Fallback Mode', class: 'api-fallback' },
-                    error: { text: '🔴 Offline', class: 'api-error' }
-                };
+                // Fetch balance sheet
+                const balanceRes = await fetch(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${symbol}&apikey=${apiKey}`);
+                const balance = await balanceRes.json();
                 
-                const config = statusMap[status] || statusMap.error;
-                statusEl.textContent = config.text;
-                statusEl.className = `api-status ${config.class}`;
-            }
-
-            showInstallBanner() {
-                document.getElementById('installBanner').style.display = 'block';
-            }
-
-            hideInstallBanner() {
-                document.getElementById('installBanner').style.display = 'none';
-            }
-
-            initializeQuickButtons() {
-                const buttons = document.querySelectorAll('.quick-btn');
-                buttons.forEach((btn, index) => {
-                    btn.style.opacity = '0';
-                    btn.style.transform = 'translateY(20px)';
-                    btn.style.animation = `fadeInUp 0.6s ease forwards ${index * 0.1}s`;
-                });
-            }
-
-            async preloadPopularStocks() {
-                // Preload popular stocks data for faster access
-                const popularStocks = ['RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS'];
-                for (const stock of popularStocks) {
-                    try {
-                        await this.fetchStockData(stock, true); // Silent preload
-                    } catch (e) {
-                        // Ignore preload errors
+                // Fetch news
+                const newsRes = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol.replace(/\..*/,'')}&apikey=${apiKey}`);
+                const news = await newsRes.json();
+                
+                // Extract metrics
+                const name = overview.Name;
+                const description = overview.Description;
+                const sector = overview.Sector;
+                const peRatio = parseFloat(overview.PERatio) || 'N/A';
+                const pbRatio = parseFloat(overview.PriceToBookRatio) || 'N/A';
+                const roe = parseFloat(overview.ReturnOnEquityTTM) || 'N/A';
+                const debtToEquity = parseFloat(overview.DebtEquityRatio) || 'N/A';
+                const epsTTM = parseFloat(overview.EPSTTM) || 'N/A';
+                const currentPrice = parseFloat(overview.AnalystTargetPrice) || parseFloat(overview['50DayMovingAverage']) || 'N/A';
+                
+                // Earnings growth
+                let growthRate = 'N/A';
+                if (income.annualReports && income.annualReports.length >= 5) {
+                    const epsYears = income.annualReports.slice(0, 5).map(report => parseFloat(report.dilutedEPS));
+                    const growthRates = [];
+                    for (let i = 1; i < epsYears.length; i++) {
+                        if (epsYears[i-1] !== 0) {
+                            growthRates.push((epsYears[i] - epsYears[i-1]) / Math.abs(epsYears[i-1]) * 100);
+                        }
                     }
+                    growthRate = growthRates.length > 0 ? (growthRates.reduce((a, b) => a + b, 0) / growthRates.length).toFixed(2) : 'N/A';
                 }
-            }
-
-            handleStockInputChange(value) {
-                if (value.length > 1 && !value.includes('.NS')) {
-                    // Auto-suggest NSE format
-                    const suggestions = [
-                        'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ITC.NS',
-                        'HINDUNILVR.NS', 'ICICIBANK.NS', 'BAJFINANCE.NS', 'ASIANPAINT.NS',
-                        'MARUTI.NS', 'SBIN.NS', 'WIPRO.NS', 'AXISBANK.NS', 'KOTAKBANK.NS'
-                    ];
-                    
-                    const matches = suggestions.filter(stock => 
-                        stock.toLowerCase().includes(value.toLowerCase())
-                    );
-                    
-                    if (matches.length > 0) {
-                        // Create autocomplete dropdown (simplified version)
-                        this.showAutocompleteSuggestions(matches.slice(0, 5));
-                    }
+                
+                // Intrinsic value
+                let intrinsicValue = 'N/A';
+                if (epsTTM !== 'N/A' && growthRate !== 'N/A') {
+                    const g = parseFloat(growthRate) / 100;
+                    const bondYield = 7;
+                    intrinsicValue = (epsTTM * (8.5 + 2 * g * 100) * 4.4 / bondYield).toFixed(2);
                 }
-            }
-
-            showAutocompleteSuggestions(suggestions) {
-                // Remove existing suggestions
-                const existing = document.getElementById('suggestions');
-                if (existing) existing.remove();
-
-                if (suggestions.length === 0) return;
-
-                const suggestionsDiv = document.createElement('div');
-                suggestionsDiv.id = 'suggestions';
-                suggestionsDiv.style.cssText = `
-                    position: absolute;
-                    top: 100%;
-                    left: 0;
-                    right: 0;
-                    background: white;
-                    border: 2px solid #e2e8f0;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-                    z-index: 100;
-                    max-height: 200px;
-                    overflow-y: auto;
-                `;
-
-                suggestions.forEach((stock, index) => {
-                    const item = document.createElement('div');
-                    item.style.cssText = `
-                        padding: 12px 16px;
-                        cursor: pointer;
-                        border-bottom: 1px solid #f1f1f1;
-                        transition: background 0.2s;
-                    `;
-                    item.textContent = stock;
-                    item.addEventListener('mouseenter', () => item.style.background = '#f7fafc');
-                    item.addEventListener('mouseleave', () => item.style.background = 'white');
-                    item.addEventListener('click', () => {
-                        document.getElementById('stockInput').value = stock;
-                        suggestionsDiv.remove();
-                        this.analyzeStock();
+                
+                // Margin of safety
+                let marginOfSafety = 'N/A';
+                if (currentPrice !== 'N/A' && intrinsicValue !== 'N/A') {
+                    marginOfSafety = currentPrice < (intrinsicValue * 0.75) ? 'Good margin' : 'Insufficient margin';
+                }
+                
+                // Buffett Score
+                let score = 0;
+                let analysis = '';
+                if (roe > 15) { score += 2; analysis += '<li class="list-group-item"><i class="fas fa-check-circle text-success"></i> High ROE: Good.</li>'; } else { analysis += '<li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> ROE: Needs improvement.</li>'; }
+                if (debtToEquity < 0.5) { score += 2; analysis += '<li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Low Debt/Equity: Strong.</li>'; } else { analysis += '<li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Debt/Equity: High.</li>'; }
+                if (peRatio < 15) { score += 1; analysis += '<li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Low P/E: Undervalued.</li>'; } else { analysis += '<li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> P/E: Overvalued.</li>'; }
+                if (growthRate > 5) { score += 1; analysis += '<li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Consistent growth: Positive.</li>'; } else { analysis += '<li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Growth: Lacking.</li>'; }
+                const moatKeywords = ['leader', 'dominant', 'brand', 'patent', 'network', 'scale'];
+                const hasMoat = moatKeywords.some(word => description.toLowerCase().includes(word));
+                if (hasMoat) { score += 2; analysis += '<li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Economic moat detected.</li>'; } else { analysis += '<li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Moat: Not evident.</li>'; }
+                
+                // Suggestion
+                let suggestion = '';
+                let badgeClass = '';
+                if (score >= 6) { suggestion = 'Strong Buy'; badgeClass = 'bg-success'; }
+                else if (score >= 4) { suggestion = 'Hold/Buy'; badgeClass = 'bg-warning'; }
+                else { suggestion = 'Avoid/Sell'; badgeClass = 'bg-danger'; }
+                
+                // Financial Statements Tables
+                let incomeTable = '<table><thead><tr><th>Year</th><th>Revenue</th><th>Net Income</th><th>EPS</th></tr></thead><tbody>';
+                if (income.annualReports) {
+                    income.annualReports.forEach(report => {
+                        incomeTable += `<tr><td>${report.fiscalDateEnding}</td><td>${report.totalRevenue}</td><td>${report.netIncome}</td><td>${report.dilutedEPS}</td></tr>`;
                     });
-                    suggestionsDiv.appendChild(item);
-                });
-
-                const searchContainer = document.querySelector('.search-container');
-                searchContainer.style.position = 'relative';
-                searchContainer.appendChild(suggestionsDiv);
-
-                // Remove suggestions when clicking outside
-                setTimeout(() => {
-                    document.addEventListener('click', (e) => {
-                        if (!searchContainer.contains(e.target)) {
-                            suggestionsDiv.remove();
-                        }
-                    }, { once: true });
-                }, 100);
-            }
-
-            async analyzeStock() {
-                let symbol = document.getElementById('stockInput').value.trim().toUpperCase();
-                if (!symbol) {
-                    this.showError('Please enter a stock symbol (e.g., RELIANCE.NS, TCS.NS)');
-                    return;
                 }
-
-                // Auto-add .NS if not present and doesn't have other exchange suffix
-                if (!symbol.includes('.') && !symbol.includes(':')) {
-                    symbol += '.NS';
-                    document.getElementById('stockInput').value = symbol;
-                }
-
-                this.showLoading();
-                this.hideError();
-                this.hideResults();
-
-                try {
-                    const stockData = await this.fetchStockData(symbol);
-                    if (stockData && stockData.price > 0) {
-                        this.displayResults(stockData, symbol);
-                        this.trackAnalysis(symbol);
-                    } else {
-                        throw new Error('Invalid stock data received');
-                    }
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    this.showError(`Unable to fetch data for ${symbol}. Please check the symbol and try again. Make sure to use NSE format (e.g., RELIANCE.NS)`);
-                    this.updateApiStatus('error');
-                } finally {
-                    this.hideLoading();
-                }
-            }
-
-            async fetchStockData(symbol, silent = false) {
-                // Check cache first (5-minute cache)
-                const cacheKey = `${symbol}_${Math.floor(Date.now() / 300000)}`;
-                if (this.cache.has(cacheKey)) {
-                    return this.cache.get(cacheKey);
-                }
-
-                // Rate limiting
-                const now = Date.now();
-                if (this.rateLimiter.has(symbol)) {
-                    const lastCall = this.rateLimiter.get(symbol);
-                    if (now - lastCall < 1000) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
-                this.rateLimiter.set(symbol, now);
-
-                // Try APIs in order of preference
-                const apiMethods = [
-                    () => this.fetchFromAlphaVantage(symbol),
-                    () => this.fetchFromFinnhub(symbol),
-                    () => this.fetchFromYahoo(symbol),
-                    () => this.fetchFromPolygon(symbol),
-                    () => this.fetchFromTwelveData(symbol)
-                ];
-
-                for (const apiMethod of apiMethods) {
-                    try {
-                        const data = await apiMethod();
-                        if (data && data.currentPrice > 0) {
-                            this.cache.set(cacheKey, data);
-                            if (!silent) this.updateApiStatus('live');
-                            return data;
-                        }
-                    } catch (error) {
-                        console.log(`API method failed: ${error.message}`);
-                        continue;
-                    }
-                }
-
-                // Final fallback to enhanced mock data
-                if (!silent) this.updateApiStatus('fallback');
-                const mockData = this.generateEnhancedMockData(symbol);
-                this.cache.set(cacheKey, mockData);
-                return mockData;
-            }
-
-            async fetchFromAlphaVantage(symbol) {
-                if (!this.apiKeys.alphaVantage || this.apiKeys.alphaVantage === 'YOUR_ALPHA_VANTAGE_KEY_HERE') {
-                    throw new Error('Alpha Vantage API key not configured');
-                }
-
-                try {
-                    console.log(`🔍 Fetching from Alpha Vantage: ${symbol}`);
-                    
-                    // Alpha Vantage doesn't support Indian stocks directly
-                    // We'll use global overview and then enhance with Yahoo data
-                    const cleanSymbol = symbol.replace('.NS', '').replace('.BSE', '');
-                    
-                    // Try different symbol formats
-                    const symbolFormats = [
-                        `${cleanSymbol}.BSE`,  // Bombay Stock Exchange
-                        `${cleanSymbol}.NSE`,  // National Stock Exchange  
-                        cleanSymbol,           // Just the symbol
-                        `${cleanSymbol}.BO`,   // Yahoo format for BSE
-                        `${cleanSymbol}.NS`    // Yahoo format for NSE
-                    ];
-
-                    let overviewData = null;
-                    let quoteData = null;
-
-                    // Try each symbol format
-                    for (const testSymbol of symbolFormats) {
-                        try {
-                            console.log(`🔍 Trying Alpha Vantage with symbol: ${testSymbol}`);
-                            
-                            // Get company overview
-                            const overviewUrl = `${this.apiEndpoints.alphaVantage}?function=OVERVIEW&symbol=${testSymbol}&apikey=${this.apiKeys.alphaVantage}`;
-                            console.log(`📡 Alpha Vantage URL: ${overviewUrl}`);
-                            
-                            const overviewResponse = await fetch(overviewUrl);
-                            console.log(`📡 Alpha Vantage Response Status: ${overviewResponse.status}`);
-                            
-                            if (!overviewResponse.ok) {
-                                throw new Error(`HTTP ${overviewResponse.status}`);
-                            }
-
-                            overviewData = await overviewResponse.json();
-                            console.log('📊 Alpha Vantage Overview Data:', overviewData);
-
-                            // Check for errors or rate limits
-                            if (overviewData.Note) {
-                                console.warn('⚠️ Alpha Vantage Rate Limit:', overviewData.Note);
-                                throw new Error('Rate limit reached');
-                            }
-
-                            if (overviewData.Information) {
-                                console.warn('⚠️ Alpha Vantage Info:', overviewData.Information);
-                                throw new Error('API information message');
-                            }
-
-                            if (overviewData.Symbol && overviewData.Name) {
-                                console.log('✅ Found valid overview data for:', testSymbol);
-                                
-                                // Now try to get quote data
-                                try {
-                                    const quoteUrl = `${this.apiEndpoints.alphaVantage}?function=GLOBAL_QUOTE&symbol=${testSymbol}&apikey=${this.apiKeys.alphaVantage}`;
-                                    const quoteResponse = await fetch(quoteUrl);
-                                    
-                                    if (quoteResponse.ok) {
-                                        quoteData = await quoteResponse.json();
-                                        console.log('📊 Alpha Vantage Quote Data:', quoteData);
-                                        
-                                        if (quoteData['Global Quote'] && quoteData['Global Quote']['05. price']) {
-                                            console.log('✅ Found valid quote data for:', testSymbol);
-                                            break;
-                                        }
-                                    }
-                                } catch (quoteError) {
-                                    console.warn('⚠️ Quote fetch failed, using overview only');
-                                }
-                                
-                                break; // We have at least overview data
-                            }
-                        } catch (formatError) {
-                            console.log(`❌ Format ${testSymbol} failed:`, formatError.message);
-                            continue;
-                        }
-                    }
-
-                    if (!overviewData || (!overviewData.Symbol && !overviewData.Name)) {
-                        throw new Error('No valid data found for any symbol format');
-                    }
-
-                    return this.parseAlphaVantageData(overviewData, quoteData, symbol);
-                } catch (error) {
-                    console.error('❌ Alpha Vantage error:', error);
-                    throw new Error(`Alpha Vantage error: ${error.message}`);
-                }
-            }
-
-            parseAlphaVantageData(overview, quote, symbol) {
-                console.log('🔧 Parsing Alpha Vantage data...');
+                incomeTable += '</tbody></table>';
                 
-                const globalQuote = quote ? (quote['Global Quote'] || {}) : {};
-                
-                // Handle missing data gracefully
-                const currentPrice = parseFloat(globalQuote['05. price'] || overview.Price || 0);
-                const marketCap = parseFloat(overview.MarketCapitalization || 0) / 1e9; // Convert to billions
-                
-                const result = {
-                    name: overview.Name || `${symbol.replace('.NS', '').replace('.BSE', '')} Limited`,
-                    currentPrice: currentPrice,
-                    marketCap: marketCap,
-                    pe: parseFloat(overview.PERatio || 0) || this.getRealisticPE(),
-                    pb: parseFloat(overview.PriceToBookRatio || 0) || this.getRealisticPB(),
-                    roe: (parseFloat(overview.ReturnOnEquityTTM || 0) * 100) || this.getRealisticROE(),
-                    debtToEquity: parseFloat(overview.DebtToEquityRatio || 0) || this.getRealisticDebt(),
-                    currentRatio: parseFloat(overview.CurrentRatio || 0) || this.getRealisticCurrentRatio(),
-                    revenueGrowth: (parseFloat(overview.QuarterlyRevenueGrowthYOY || 0) * 100) || this.getRealisticGrowth(),
-                    profitGrowth: (parseFloat(overview.QuarterlyEarningsGrowthYOY || 0) * 100) || this.getRealisticGrowth(),
-                    dividendYield: (parseFloat(overview.DividendYield || 0) * 100) || this.getRealisticDividend(),
-                    sector: overview.Sector || this.determineSector(symbol),
-                    bookValue: parseFloat(overview.BookValue || 0) || (currentPrice / 3),
-                    eps: parseFloat(overview.EPS || 0) || (currentPrice / 20),
-                    priceChange: parseFloat(globalQuote['10. change percent']?.replace('%', '') || 0) || this.getRealisticPriceChange(),
-                    volume: parseInt(globalQuote['06. volume'] || 0) || this.getRealisticVolume(),
-                    fiftyTwoWeekHigh: parseFloat(overview['52WeekHigh'] || 0) || (currentPrice * 1.3),
-                    fiftyTwoWeekLow: parseFloat(overview['52WeekLow'] || 0) || (currentPrice * 0.7),
-                    dataSource: 'Alpha Vantage'
-                };
-                
-                console.log('✅ Parsed Alpha Vantage result:', result);
-                return result;
-            }
-
-            // Helper methods for realistic fallback values
-            getRealisticPE() {
-                return 12 + Math.random() * 18; // 12-30 range
-            }
-
-            getRealisticPB() {
-                return 1.5 + Math.random() * 4; // 1.5-5.5 range
-            }
-
-            getRealisticROE() {
-                return 8 + Math.random() * 22; // 8-30% range
-            }
-
-            getRealisticDebt() {
-                return Math.random() * 0.8; // 0-0.8 range
-            }
-
-            getRealisticCurrentRatio() {
-                return 1.2 + Math.random() * 2; // 1.2-3.2 range
-            }
-
-            getRealisticGrowth() {
-                return -5 + Math.random() * 25; // -5% to 20% range
-            }
-
-            getRealisticDividend() {
-                return Math.random() * 4; // 0-4% range
-            }
-
-            getRealisticPriceChange() {
-                return (Math.random() - 0.5) * 6; // -3% to +3% range
-            }
-
-            getRealisticVolume() {
-                return 100000 + Math.random() * 2000000; // 100K-2M range
-            }
-
-            async fetchFromFinnhub(symbol) {
-                if (!this.apiKeys.finnhub || this.apiKeys.finnhub === 'YOUR_FINNHUB_KEY_HERE') {
-                    throw new Error('Finnhub API key not configured');
+                let balanceTable = '<table><thead><tr><th>Year</th><th>Total Assets</th><th>Total Liabilities</th><th>Equity</th></tr></thead><tbody>';
+                if (balance.annualReports) {
+                    balance.annualReports.forEach(report => {
+                        balanceTable += `<tr><td>${report.fiscalDateEnding}</td><td>${report.totalAssets}</td><td>${report.totalLiabilities}</td><td>${report.totalShareholderEquity}</td></tr>`;
+                    });
                 }
-
-                try {
-                    // Convert symbol format for Finnhub
-                    const fhSymbol = symbol.replace('.NS', '.BSE');
-                    
-                    // Get quote
-                    const quoteUrl = `${this.apiEndpoints.finnhub}quote?symbol=${fhSymbol}&token=${this.apiKeys.finnhub}`;
-                    const quoteResponse = await fetch(quoteUrl);
-                    const quoteData = await quoteResponse.json();
-
-                    // Get company profile
-                    const profileUrl = `${this.apiEndpoints.finnhub}stock/profile2?symbol=${fhSymbol}&token=${this.apiKeys.finnhub}`;
-                    const profileResponse = await fetch(profileUrl);
-                    const profileData = await profileResponse.json();
-
-                    // Get basic financials
-                    const financialsUrl = `${this.apiEndpoints.finnhub}stock/metric?symbol=${fhSymbol}&metric=all&token=${this.apiKeys.finnhub}`;
-                    const financialsResponse = await fetch(financialsUrl);
-                    const financialsData = await financialsResponse.json();
-
-                    return this.parseFinnhubData(quoteData, profileData, financialsData, symbol);
-                } catch (error) {
-                    throw new Error(`Finnhub error: ${error.message}`);
+                balanceTable += '</tbody></table>';
+                
+                // News
+                let newsSection = '';
+                if (news.feed) {
+                    news.feed.slice(0, 5).forEach(item => {
+                        newsSection += `
+                            <div class="news-item">
+                                <div class="news-title"><a href="${item.url}" target="_blank">${item.title}</a></div>
+                                <div class="news-summary">${item.summary}</div>
+                                <div class="news-sentiment">Sentiment: ${item.overall_sentiment_label} (Score: ${item.overall_sentiment_score})</div>
+                            </div>`;
+                    });
+                } else {
+                    newsSection = '<p>No recent news available.</p>';
                 }
-            }
-
-            async fetchFromPolygon(symbol) {
-                if (!this.apiKeys.polygon || this.apiKeys.polygon === 'YOUR_POLYGON_KEY_HERE') {
-                    throw new Error('Polygon API key not configured');
-                }
-
-                try {
-                    // Get previous close
-                    const prevCloseUrl = `${this.apiEndpoints.polygon}aggs/ticker/${symbol}/prev?adjusted=true&apikey=${this.apiKeys.polygon}`;
-                    const prevCloseResponse = await fetch(prevCloseUrl);
-                    const prevCloseData = await prevCloseResponse.json();
-
-                    // Get ticker details
-                    const detailsUrl = `${this.apiEndpoints.polygon}reference/tickers/${symbol}?apikey=${this.apiKeys.polygon}`;
-                    const detailsResponse = await fetch(detailsUrl);
-                    const detailsData = await detailsResponse.json();
-
-                    return this.parsePolygonData(prevCloseData, detailsData, symbol);
-                } catch (error) {
-                    throw new Error(`Polygon error: ${error.message}`);
-                }
-            }
-
-            async fetchFromTwelveData(symbol) {
-                if (!this.apiKeys.twelveData || this.apiKeys.twelveData === 'YOUR_TWELVE_DATA_KEY_HERE') {
-                    throw new Error('Twelve Data API key not configured');
-                }
-
-                try {
-                    // Get quote
-                    const quoteUrl = `${this.apiEndpoints.twelveData}quote?symbol=${symbol}&apikey=${this.apiKeys.twelveData}`;
-                    const quoteResponse = await fetch(quoteUrl);
-                    const quoteData = await quoteResponse.json();
-
-                    // Get statistics
-                    const statsUrl = `${this.apiEndpoints.twelveData}statistics?symbol=${symbol}&apikey=${this.apiKeys.twelveData}`;
-                    const statsResponse = await fetch(statsUrl);
-                    const statsData = await statsResponse.json();
-
-                    return this.parseTwelveData(quoteData, statsData, symbol);
-                } catch (error) {
-                    throw new Error(`Twelve Data error: ${error.message}`);
-                }
-            }
-
-            parseAlphaVantageData(overview, quote, symbol) {
-                const globalQuote = quote['Global Quote'] || {};
                 
-                return {
-                    name: overview.Name || `${symbol.replace('.NS', '')} Limited`,
-                    currentPrice: parseFloat(globalQuote['05. price'] || overview.Price || 0),
-                    marketCap: parseFloat(overview.MarketCapitalization || 0) / 1e9,
-                    pe: parseFloat(overview.PERatio || 0),
-                    pb: parseFloat(overview.PriceToBookRatio || 0),
-                    roe: parseFloat(overview.ReturnOnEquityTTM || 0) * 100,
-                    debtToEquity: parseFloat(overview.DebtToEquityRatio || 0),
-                    currentRatio: parseFloat(overview.CurrentRatio || 0),
-                    revenueGrowth: parseFloat(overview.QuarterlyRevenueGrowthYOY || 0) * 100,
-                    profitGrowth: parseFloat(overview.QuarterlyEarningsGrowthYOY || 0) * 100,
-                    dividendYield: parseFloat(overview.DividendYield || 0) * 100,
-                    sector: overview.Sector || this.determineSector(symbol),
-                    bookValue: parseFloat(overview.BookValue || 0),
-                    eps: parseFloat(overview.EPS || 0),
-                    priceChange: parseFloat(globalQuote['10. change percent']?.replace('%', '') || 0),
-                    volume: parseInt(globalQuote['06. volume'] || 0),
-                    fiftyTwoWeekHigh: parseFloat(overview['52WeekHigh'] || 0),
-                    fiftyTwoWeekLow: parseFloat(overview['52WeekLow'] || 0)
-                };
-            }
-
-            parseFinnhubData(quote, profile, financials, symbol) {
-                const metrics = financials.metric || {};
-                
-                return {
-                    name: profile.name || `${symbol.replace('.NS', '')} Limited`,
-                    currentPrice: quote.c || 0,
-                    marketCap: (profile.marketCapitalization || 0) / 1000,
-                    pe: metrics.peBasicExclExtraTTM || metrics.peTTM || 0,
-                    pb: metrics.pbQuarterly || 0,
-                    roe: (metrics.roeTTM || 0) * 100,
-                    debtToEquity: metrics.totalDebt2TotalEquityQuarterly || 0,
-                    currentRatio: metrics.currentRatioQuarterly || 0,
-                    revenueGrowth: (metrics.revenueGrowthTTMYoy || 0) * 100,
-                    profitGrowth: (metrics.epsGrowthTTMYoy || 0) * 100,
-                    dividendYield: (metrics.dividendYieldIndicatedAnnual || 0) * 100,
-                    sector: profile.finnhubIndustry || this.determineSector(symbol),
-                    bookValue: quote.c / (metrics.pbQuarterly || 1),
-                    eps: metrics.epsBasicExclExtraItemsTTM || 0,
-                    priceChange: quote.dp || 0,
-                    volume: quote.v || 0,
-                    fiftyTwoWeekHigh: metrics['52WeekHigh'] || quote.h || 0,
-                    fiftyTwoWeekLow: metrics['52WeekLow'] || quote.l || 0
-                };
-            }
-
-            parsePolygonData(prevClose, details, symbol) {
-                const result = prevClose.results?.[0] || {};
-                const ticker = details.results || {};
-                
-                return {
-                    name: ticker.name || `${symbol.replace('.NS', '')} Limited`,
-                    currentPrice: result.c || 0,
-                    marketCap: (ticker.market_cap || 0) / 1e9,
-                    pe: 0, // Not available in free tier
-                    pb: 0, // Not available in free tier
-                    roe: 0, // Not available in free tier
-                    debtToEquity: 0, // Not available in free tier
-                    currentRatio: 0, // Not available in free tier
-                    revenueGrowth: 0, // Not available in free tier
-                    profitGrowth: 0, // Not available in free tier
-                    dividendYield: 0, // Not available in free tier
-                    sector: ticker.sic_description || this.determineSector(symbol),
-                    bookValue: 0,
-                    eps: 0,
-                    priceChange: ((result.c - result.o) / result.o) * 100 || 0,
-                    volume: result.v || 0,
-                    fiftyTwoWeekHigh: result.h || 0,
-                    fiftyTwoWeekLow: result.l || 0
-                };
-            }
-
-            parseTwelveData(quote, stats, symbol) {
-                return {
-                    name: quote.name || `${symbol.replace('.NS', '')} Limited`,
-                    currentPrice: parseFloat(quote.close || 0),
-                    marketCap: parseFloat(stats.statistics?.market_capitalization || 0) / 1e9,
-                    pe: parseFloat(stats.statistics?.pe_ratio || 0),
-                    pb: parseFloat(stats.statistics?.price_to_book_ratio || 0),
-                    roe: parseFloat(stats.statistics?.return_on_equity || 0) * 100,
-                    debtToEquity: parseFloat(stats.statistics?.debt_to_equity || 0),
-                    currentRatio: parseFloat(stats.statistics?.current_ratio || 0),
-                    revenueGrowth: parseFloat(stats.statistics?.revenue_growth || 0) * 100,
-                    profitGrowth: parseFloat(stats.statistics?.earnings_growth || 0) * 100,
-                    dividendYield: parseFloat(stats.statistics?.dividend_yield || 0) * 100,
-                    sector: this.determineSector(symbol),
-                    bookValue: parseFloat(stats.statistics?.book_value || 0),
-                    eps: parseFloat(stats.statistics?.earnings_per_share || 0),
-                    priceChange: parseFloat(quote.percent_change || 0),
-                    volume: parseInt(quote.volume || 0),
-                    fiftyTwoWeekHigh: parseFloat(quote.fifty_two_week.high || 0),
-                    fiftyTwoWeekLow: parseFloat(quote.fifty_two_week.low || 0)
-                };
-            }
-
-            async fetchFromYahoo(symbol) {
-                try {
-                    // Fetch basic quote
-                    const quoteResponse = await fetch(`${this.apiEndpoints.yahoo}${symbol}?metrics=high&interval=1d&range=1d`);
-                    
-                    if (!quoteResponse.ok) {
-                        throw new Error(`HTTP ${quoteResponse.status}`);
-                    }
-
-                    const quoteData = await quoteResponse.json();
-                    
-                    if (!quoteData.chart?.result?.[0]) {
-                        throw new Error('No chart data available');
-                    }
-
-                    const result = quoteData.chart.result[0];
-                    const meta = result.meta;
-                    
-                    // Fetch fundamentals
-                    const fundResponse = await fetch(`${this.apiEndpoints.yahoo_fundamentals}${symbol}?modules=summaryDetail,defaultKeyStatistics,financialData,incomeStatementHistory`);
-                    let fundData = {};
-                    
-                    if (fundResponse.ok) {
-                        const fundJson = await fundResponse.json();
-                        fundData = fundJson.quoteSummary?.result?.[0] || {};
-                    }
-
-                    return this.parseYahooData(meta, fundData, symbol);
-                } catch (error) {
-                    throw new Error(`Yahoo Finance API error: ${error.message}`);
-                }
-            }
-
-            parseYahooData(meta, fundData, symbol) {
-                const summaryDetail = fundData.summaryDetail || {};
-                const keyStats = fundData.defaultKeyStatistics || {};
-                const financialData = fundData.financialData || {};
-
-                // Extract company name
-                const companyName = meta.longName || meta.shortName || symbol.replace('.NS', '') + ' Limited';
-                
-                // Current price
-                const currentPrice = meta.regularMarketPrice || meta.previousClose || 0;
-                
-                // Market cap (in crores)
-                const marketCap = meta.marketCap ? meta.marketCap / 1e9 : 0; // Convert to billions first
-                
-                // Financial ratios
-                const pe = summaryDetail.trailingPE || keyStats.trailingPE || this.calculatePE(currentPrice, financialData.totalRevenue);
-                const pb = summaryDetail.priceToBook || keyStats.priceToBook || 0;
-                const roe = keyStats.returnOnEquity ? keyStats.returnOnEquity * 100 : 0;
-                
-                // Debt and liquidity
-                const debtToEquity = financialData.debtToEquity || 0;
-                const currentRatio = financialData.currentRatio || 0;
-                
-                // Growth rates (approximated from available data)
-                const revenueGrowth = financialData.revenueGrowth ? financialData.revenueGrowth * 100 : 0;
-                const earningsGrowth = financialData.earningsGrowth ? financialData.earningsGrowth * 100 : 0;
-                
-                // Dividend yield
-                const dividendYield = summaryDetail.dividendYield ? summaryDetail.dividendYield * 100 : 0;
-                
-                // Sector determination
-                const sector = this.determineSector(symbol);
-                
-                return {
-                    name: companyName,
-                    currentPrice: currentPrice,
-                    marketCap: marketCap,
-                    pe: pe || 15 + Math.random() * 20, // Fallback with realistic range
-                    pb: pb || 1 + Math.random() * 5,
-                    roe: roe || 10 + Math.random() * 25,
-                    debtToEquity: debtToEquity || Math.random() * 0.8,
-                    currentRatio: currentRatio || 1.2 + Math.random() * 2,
-                    revenueGrowth: revenueGrowth || -5 + Math.random() * 25,
-                    profitGrowth: earningsGrowth || -5 + Math.random() * 30,
-                    dividendYield: dividendYield || Math.random() * 4,
-                    sector: sector,
-                    bookValue: summaryDetail.bookValue || currentPrice / (pb || 2),
-                    eps: keyStats.trailingEps || currentPrice / (pe || 20),
-                    revenue: meta.marketCap ? meta.marketCap / ((pe || 20) * 0.1) : 50000,
-                    netProfit: meta.marketCap ? meta.marketCap * 0.05 : 5000,
-                    priceChange: meta.regularMarketChangePercent || (Math.random() - 0.5) * 10,
-                    volume: meta.regularMarketVolume || 1000000,
-                    fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh || currentPrice * 1.2,
-                    fiftyTwoWeekLow: meta.fiftyTwoWeekLow || currentPrice * 0.8
-                };
-            }
-
-            async fetchFromAlternativeAPI(symbol) {
-                // Alternative free API (simplified version)
-                try {
-                    // This would be replaced with actual alternative API
-                    // For now, return enhanced mock data
-                    return this.generateEnhancedMockData(symbol);
-                } catch (error) {
-                    throw new Error(`Alternative API error: ${error.message}`);
-                }
-            }
-
-            generateEnhancedMockData(symbol) {
-                const stockDatabase = {
-                    'RELIANCE.NS': {
-                        name: 'Reliance Industries Limited',
-                        currentPrice: 2487.65,
-                        marketCap: 16.78,
-                        pe: 13.2,
-                        pb: 1.68,
-                        roe: 12.8,
-                        debtToEquity: 0.29,
-                        currentRatio: 1.72,
-                        revenueGrowth: 29.1,
-                        profitGrowth: 24.3,
-                        dividendYield: 0.33,
-                        sector: 'Oil & Gas / Petrochemicals'
-                    },
-                    'TCS.NS': {
-                        name: 'Tata Consultancy Services Limited',
-                        currentPrice: 3534.20,
-                        marketCap: 12.85,
-                        pe: 26.8,
-                        pb: 12.9,
-                        roe: 44.2,
-                        debtToEquity: 0.01,
-                        currentRatio: 3.51,
-                        revenueGrowth: 16.8,
-                        profitGrowth: 14.2,
-                        dividendYield: 1.18,
-                        sector: 'Information Technology'
-                    },
-                    'INFY.NS': {
-                        name: 'Infosys Limited',
-                        currentPrice: 1452.30,
-                        marketCap: 6.05,
-                        pe: 23.4,
-                        pb: 9.1,
-                        roe: 31.6,
-                        debtToEquity: 0.02,
-                        currentRatio: 2.94,
-                        revenueGrowth: 14.2,
-                        profitGrowth: 12.1,
-                        dividendYield: 2.31,
-                        sector: 'Information Technology'
-                    },
-                    'HDFCBANK.NS': {
-                        name: 'HDFC Bank Limited',
-                        currentPrice: 1548.75,
-                        marketCap: 11.82,
-                        pe: 19.2,
-                        pb: 2.9,
-                        roe: 17.1,
-                        debtToEquity: 0.0,
-                        currentRatio: 0.0,
-                        revenueGrowth: 13.1,
-                        profitGrowth: 19.4,
-                        dividendYield: 1.15,
-                        sector: 'Banking & Financial Services'
-                    },
-                    'ITC.NS': {
-                        name: 'ITC Limited',
-                        currentPrice: 456.80,
-                        marketCap: 5.69,
-                        pe: 25.7,
-                        pb: 5.1,
-                        roe: 20.8,
-                        debtToEquity: 0.0,
-                        currentRatio: 2.97,
-                        revenueGrowth: 8.4,
-                        profitGrowth: 6.1,
-                        dividendYield: 4.92,
-                        sector: 'FMCG / Tobacco'
-                    }
-                };
-
-                if (stockDatabase[symbol]) {
-                    const data = stockDatabase[symbol];
-                    return {
-                        ...data,
-                        bookValue: data.currentPrice / data.pb,
-                        eps: data.currentPrice / data.pe,
-                        revenue: data.marketCap * 1000 * 5, // Approximate
-                        netProfit: data.marketCap * 1000 * 0.8, // Approximate
-                        priceChange: (Math.random() - 0.5) * 6,
-                        volume: 1000000 + Math.random() * 5000000,
-                        fiftyTwoWeekHigh: data.currentPrice * (1.1 + Math.random() * 0.3),
-                        fiftyTwoWeekLow: data.currentPrice * (0.7 + Math.random() * 0.2)
-                    };
-                }
-
-                // Generate realistic data for unknown stocks
-                const sectors = [
-                    'Information Technology', 'Banking & Financial Services',
-                    'Pharmaceuticals', 'Automotive', 'FMCG', 'Oil & Gas',
-                    'Metals & Mining', 'Telecommunications', 'Chemicals',
-                    'Textiles', 'Power', 'Construction', 'Real Estate'
-                ];
-
-                const basePrice = 200 + Math.random() * 2500;
-                const pe = 8 + Math.random() * 25;
-                const pb = 0.8 + Math.random() * 6;
-
-                return {
-                    name: `${symbol.replace('.NS', '')} Limited`,
-                    currentPrice: basePrice,
-                    marketCap: (basePrice * (10000 + Math.random() * 100000)) / 1e9,
-                    pe: pe,
-                    pb: pb,
-                    roe: 5 + Math.random() * 30,
-                    debtToEquity: Math.random() * 1.5,
-                    currentRatio: 0.8 + Math.random() * 2.5,
-                    revenueGrowth: -8 + Math.random() * 35,
-                    profitGrowth: -12 + Math.random() * 40,
-                    dividendYield: Math.random() * 5,
-                    sector: sectors[Math.floor(Math.random() * sectors.length)],
-                    bookValue: basePrice / pb,
-                    eps: basePrice / pe,
-                    revenue: 5000 + Math.random() * 200000,
-                    netProfit: 500 + Math.random() * 25000,
-                    priceChange: (Math.random() - 0.5) * 8,
-                    volume: 100000 + Math.random() * 2000000,
-                    fiftyTwoWeekHigh: basePrice * (1.15 + Math.random() * 0.25),
-                    fiftyTwoWeekLow: basePrice * (0.75 + Math.random() * 0.15)
-                };
-            }
-
-            determineSector(symbol) {
-                const sectorMap = {
-                    'RELIANCE': 'Oil & Gas / Petrochemicals',
-                    'TCS': 'Information Technology',
-                    'INFY': 'Information Technology',
-                    'WIPRO': 'Information Technology',
-                    'HDFCBANK': 'Banking & Financial Services',
-                    'ICICIBANK': 'Banking & Financial Services',
-                    'SBIN': 'Banking & Financial Services',
-                    'AXISBANK': 'Banking & Financial Services',
-                    'KOTAKBANK': 'Banking & Financial Services',
-                    'ITC': 'FMCG / Tobacco',
-                    'HINDUNILVR': 'FMCG',
-                    'NESTLEIND': 'FMCG',
-                    'MARUTI': 'Automotive',
-                    'TATAMOTORS': 'Automotive',
-                    'BAJFINANCE': 'Financial Services',
-                    'ASIANPAINT': 'Chemicals & Paints',
-                    'ULTRACEMCO': 'Cement',
-                    'LT': 'Construction',
-                    'SUNPHARMA': 'Pharmaceuticals',
-                    'DRREDDY': 'Pharmaceuticals',
-                    'TITAN': 'Consumer Discretionary'
-                };
-
-                const stockName = symbol.replace('.NS', '').replace('.BSE', '');
-                return sectorMap[stockName] || 'Mixed Industries';
-            }
-
-            calculatePE(price, revenue) {
-                if (!revenue || revenue === 0) return 15 + Math.random() * 15;
-                // Simplified P/E estimation
-                return Math.max(5, Math.min(50, price / (revenue / 1000000000 * 0.1)));
-            }
-
-            displayResults(data, symbol) {
-                this.renderStockHeader(data, symbol);
-                this.renderMetricsGrid(data);
-                this.renderBuffettAnalysis(data, symbol);
-                this.showResults();
-            }
-
-            renderStockHeader(data, symbol) {
-                const stockHeader = document.getElementById('stockHeader');
-                const priceChange = data.priceChange || 0;
-                const changeClass = priceChange >= 0 ? '#48bb78' : '#e53e3e';
-                const changeSymbol = priceChange >= 0 ? '▲' : '▼';
-                
-                stockHeader.innerHTML = `
-                    <div class="stock-name">${data.name} (${symbol})</div>
-                    <div class="stock-price">
-                        ₹${data.currentPrice.toFixed(2)}
-                        <span style="font-size: 1rem; margin-left: 15px; color: ${changeClass};">
-                            ${changeSymbol} ${Math.abs(priceChange).toFixed(2)}%
-                        </span>
+                // Display with Tabs
+                resultDiv.innerHTML = `
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="financials-tab" data-bs-toggle="tab" data-bs-target="#financials" type="button" role="tab">Financials</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab">News</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chart" type="button" role="tab">Chart</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0">${name} (${symbol})</h4>
+                                    <span class="badge ${badgeClass}">${suggestion}</span>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Sector:</strong> ${sector}</p>
+                                    <p><strong>Description:</strong> ${description}</p>
+                                    <h5>Key Metrics</h5>
+                                    <ul class="list-group mb-3">
+                                        <li class="list-group-item">ROE: ${roe}%</li>
+                                        <li class="list-group-item">Debt/Equity: ${debtToEquity}</li>
+                                        <li class="list-group-item">P/E Ratio: ${peRatio}</li>
+                                        <li class="list-group-item">P/B Ratio: ${pbRatio}</li>
+                                        <li class="list-group-item">EPS TTM: ${epsTTM}</li>
+                                        <li class="list-group-item">Avg EPS Growth (5Y): ${growthRate}%</li>
+                                        <li class="list-group-item">Intrinsic Value: ${intrinsicValue}</li>
+                                        <li class="list-group-item">Current/Target Price: ${currentPrice}</li>
+                                        <li class="list-group-item">Margin of Safety: ${marginOfSafety}</li>
+                                    </ul>
+                                    <h5>Buffett Analysis</h5>
+                                    <ul class="list-group mb-3">${analysis}</ul>
+                                    <h5>Score: <span class="badge bg-primary">${score}/8</span></h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="financials" role="tabpanel">
+                            <h5>Income Statement</h5>
+                            ${incomeTable}
+                            <h5 class="mt-4">Balance Sheet</h5>
+                            ${balanceTable}
+                        </div>
+                        <div class="tab-pane fade" id="news" role="tabpanel">
+                            <h5>Recent News & Sentiment</h5>
+                            ${newsSection}
+                        </div>
+                        <div class="tab-pane fade" id="chart" role="tabpanel">
+                            <div id="tradingview-chart"></div>
+                        </div>
                     </div>
-                    <div class="stock-meta">
-                        Market Cap: ₹${data.marketCap.toFixed(2)} Lakh Crores • ${data.sector}<br>
-                        52W High: ₹${data.fiftyTwoWeekHigh?.toFixed(2) || 'N/A'} • 
-                        52W Low: ₹${data.fiftyTwoWeekLow?.toFixed(2) || 'N/A'} • 
-                        Volume: ${this.formatNumber(data.volume || 0)}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> Not financial advice. Do your own research.
                     </div>
                 `;
+                
+                // TradingView Chart
+                const chartSymbol = symbol.replace('.BSE', '').replace('.NS', '');
+                new TradingView.widget({
+                    "container_id": "tradingview-chart",
+                    "width": "100%",
+                    "height": 500,
+                    "symbol": symbol.endsWith('.NS') ? `NSE:${chartSymbol}` : `BSE:${chartSymbol}`,
+                    "interval": "D",
+                    "timezone": "Asia/Kolkata",
+                    "theme": "light",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "studies": ["BB@tv-basicstudies", "MACD@tv-basicstudies", "RSI@tv-basicstudies"],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650"
+                });
+                
+                spinner.style.display = 'none';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}. Check symbol, API key, or rate limits (5/min, 500/day). Try BSE suffix if NSE fails.</div>`;
+                spinner.style.display = 'none';
             }
-
-            renderMetricsGrid(data) {
-                const metricsGrid = document.getElementById('metricsGrid');
-                metricsGrid.innerHTML = `
-                    <div class="metric-card">
-                        <div class="metric-title">💰 P/E Ratio</div>
-                        <div class="metric-value" style="color: ${this.getPEColor(data.pe)}">${data.pe.toFixed(1)}</div>
-                        <div class="metric-description">
-                            Price-to-Earnings ratio. Buffett typically prefers P/E below 15-20 for value investments.
-                2
+        });
+    </script>
+</body>
+</html>
