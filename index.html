@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Period Analyzer PWA</title>
+    <title>Profit-Focused Stock Analyzer PWA</title>
     <link rel="icon" href="https://i.imgur.com/8p5Y7Zv.png" sizes="192x192">
     <link rel="apple-touch-icon" href="https://i.imgur.com/8p5Y7Zv.png">
     <meta name="theme-color" content="#007bff">
@@ -20,8 +20,8 @@
     <!-- Inline Manifest -->
     <script>
         const manifest = {
-            "short_name": "Period Analyzer",
-            "name": "Stock Period Analyzer PWA",
+            "short_name": "Stock Analyzer",
+            "name": "Profit-Focused Stock Period Analyzer PWA",
             "icons": [
                 { "src": "https://i.imgur.com/8p5Y7Zv.png", "type": "image/png", "sizes": "192x192" },
                 { "src": "https://i.imgur.com/8p5Y7Zv.png", "type": "image/png", "sizes": "512x512" }
@@ -85,6 +85,7 @@
             margin-top: 15px;
             padding: 10px;
             border-radius: 8px;
+            font-size: 0.9em;
         }
         .buy { background-color: #d4edda; color: #155724; }
         .sell { background-color: #f8d7da; color: #721c24; }
@@ -101,34 +102,37 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+        #tradingview-chart {
+            height: 300px;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
         @media (max-width: 576px) {
-            h1 {
-                font-size: 1.5em;
-            }
-            #analyzeBtn {
-                font-size: 1em;
-            }
+            h1 { font-size: 1.5em; }
+            #analyzeBtn { font-size: 1em; }
+            .judgment-section { font-size: 0.85em; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-chart-line me-2"></i>Stock Period Analyzer</h1>
-        <p class="text-muted text-center" style="font-size: 0.9em;">Analyze stock for days, weeks, months, year with judgments. Enter symbol (e.g., RELIANCE.BSE).</p>
+        <h1><i class="fas fa-chart-line me-2"></i>Profit-Focused Stock Analyzer</h1>
+        <p class="text-muted text-center" style="font-size: 0.9em;">Analyze stocks for profit across days, weeks, months, year. Use BSE (e.g., RELIANCE.BSE) for best results.</p>
         
         <div class="input-group">
             <span class="input-group-text"><i class="fas fa-search"></i></span>
-            <input type="text" class="form-control" id="stockSymbol" placeholder="Enter symbol or name (e.g., RELIANCE.BSE)" required>
+            <input type="text" class="form-control" id="stockSymbol" placeholder="Enter symbol or name (e.g., RELIANCE.BSE)" value="RELIANCE.BSE">
         </div>
         <div id="searchResults" class="list-group"></div>
         <div class="input-group">
             <label class="input-group-text"><i class="fas fa-exchange-alt"></i> Exchange</label>
             <select class="form-select" id="exchange">
-                <option value="BSE">BSE (recommended)</option>
+                <option value="BSE" selected>BSE (recommended)</option>
                 <option value="NSE">NSE</option>
             </select>
         </div>
-        <button class="btn btn-primary w-100" id="analyzeBtn"><i class="fas fa-analyze me-2"></i>Analyze Periods</button>
+        <button class="btn btn-primary w-100" id="analyzeBtn"><i class="fas fa-analyze me-2"></i>Analyze for Profit</button>
         
         <div class="spinner" id="spinner">
             <div class="spinner-border text-primary" role="status"></div>
@@ -141,61 +145,139 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+    <!-- TradingView Widget -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+
     <!-- Inline JavaScript -->
     <script>
         const apiKey = 'WRSPEAQQ1P7XX0Q9';
 
         // Service Worker
-        const swCode = `/* [same as before] */`;  // Omit for brevity, same as previous.
+        const swCode = `
+            self.addEventListener('install', (event) => {
+                event.waitUntil(
+                    caches.open('stock-analyzer-v1').then((cache) => {
+                        return cache.addAll([
+                            '/',
+                            '/index.html'
+                        ]);
+                    })
+                );
+            });
+            self.addEventListener('fetch', (event) => {
+                event.respondWith(
+                    caches.match(event.request).then((response) => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swURL = URL.createObjectURL(swBlob);
 
-        // ... (add the service worker code from previous)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swURL)
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
 
-        // Symbol Search (same as previous)
+        // Symbol Search
+        const stockSymbolInput = document.getElementById('stockSymbol');
+        const searchResults = document.getElementById('searchResults');
+        stockSymbolInput.addEventListener('input', async () => {
+            const query = stockSymbolInput.value.trim();
+            const exchange = document.getElementById('exchange').value;
+            if (query.length < 3) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            try {
+                const res = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(query)}&apikey=${apiKey}`);
+                const data = await res.json();
+                if (data['Note'] || data['Information']) {
+                    searchResults.innerHTML = '<div class="list-group-item text-danger">Rate limit reached. Wait 1-2 minutes and try again.</div>';
+                    return;
+                }
+                if (data.bestMatches && data.bestMatches.length) {
+                    searchResults.innerHTML = data.bestMatches
+                        .filter(match => match['3. type'] === 'Equity' && (match['4. region'] === 'India' || match['1. symbol'].endsWith(`.${exchange}`)))
+                        .map(match => `<a href="#" class="list-group-item list-group-item-action" data-symbol="${match['1. symbol']}">${match['2. name']} (${match['1. symbol']})</a>`)
+                        .join('');
+                    searchResults.querySelectorAll('a').forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            stockSymbolInput.value = link.dataset.symbol;
+                            searchResults.innerHTML = '';
+                        });
+                    });
+                } else {
+                    searchResults.innerHTML = '<div class="list-group-item">No matching symbols. Use BSE suffix (e.g., RELIANCE.BSE).</div>';
+                }
+            } catch (error) {
+                searchResults.innerHTML = `<div class="list-group-item text-danger">Error: ${error.message}. Check internet or wait for rate limits.</div>`;
+            }
+        });
 
-        // ... (add the symbol search code from previous)
+        // Delay function for rate limits
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-        // Period Analysis Logic
+        // Analyze Button
         document.getElementById('analyzeBtn').addEventListener('click', async () => {
-            const symbol = document.getElementById('stockSymbol').value.trim();
+            const symbolInput = document.getElementById('stockSymbol').value.trim();
             const exchange = document.getElementById('exchange').value;
             const resultDiv = document.getElementById('result');
             const spinner = document.getElementById('spinner');
-            
-            if (!symbol) {
+
+            if (!symbolInput) {
                 resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a stock symbol.</div>';
                 return;
             }
 
             // Append suffix
-            let fullSymbol = symbol;
+            let symbol = symbolInput;
             const suffix = exchange === 'BSE' ? '.BSE' : '.NS';
-            if (!fullSymbol.endsWith('.BSE') && !fullSymbol.endsWith('.NS')) {
-                fullSymbol = `${fullSymbol}${suffix}`;
+            if (!symbol.endsWith('.BSE') && !symbol.endsWith('.NS')) {
+                symbol = `${symbol}${suffix}`;
+            } else if (symbol.endsWith('.NS') && exchange === 'BSE') {
+                symbol = symbol.replace('.NS', '.BSE');
+            } else if (symbol.endsWith('.BSE') && exchange === 'NSE') {
+                symbol = symbol.replace('.BSE', '.NS');
             }
 
-            resultDiv.innerHTML = '';
             spinner.style.display = 'block';
+            resultDiv.innerHTML = '';
 
             try {
-                // Fetch daily data for short periods
-                const dailyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${fullSymbol}&outputsize=compact&apikey=${apiKey}`);
+                // Fetch data with delays to avoid rate limits
+                const dailyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&apikey=${apiKey}`);
                 const dailyData = await dailyRes.json();
-                if (!dailyData['Time Series (Daily)'] ) {
-                    throw new Error('No daily data available. Try BSE suffix if NSE fails or check rate limits.');
+                if (dailyData['Note'] || dailyData['Information']) {
+                    throw new Error('Rate limit reached. Wait 1-2 minutes.');
                 }
+                if (!dailyData['Time Series (Daily)']) {
+                    throw new Error('No daily data. Try BSE suffix (e.g., RELIANCE.BSE) or search above.');
+                }
+                await delay(15000); // 15s delay
 
-                // Fetch weekly for longer periods
-                const weeklyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${fullSymbol}&apikey=${apiKey}`);
+                const weeklyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${symbol}&apikey=${apiKey}`);
                 const weeklyData = await weeklyRes.json();
-                if (!weeklyData['Time Series (Weekly)']) {
-                    throw new Error('No weekly data available.');
+                if (weeklyData['Note'] || weeklyData['Information']) {
+                    throw new Error('Rate limit reached. Wait 1-2 minutes.');
                 }
+                if (!weeklyData['Time Series (Weekly)']) {
+                    throw new Error('No weekly data.');
+                }
+                await delay(15000);
 
-                // Fetch monthly for year
-                const monthlyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${fullSymbol}&apikey=${apiKey}`);
+                const monthlyRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${symbol}&apikey=${apiKey}`);
                 const monthlyData = await monthlyRes.json();
+                if (monthlyData['Note'] || monthlyData['Information']) {
+                    throw new Error('Rate limit reached. Wait 1-2 minutes.');
+                }
                 if (!monthlyData['Time Series (Monthly)']) {
-                    throw new Error('No monthly data available.');
+                    throw new Error('No monthly data.');
                 }
 
                 // Parse data
@@ -203,29 +285,28 @@
                 const weeklySeries = Object.entries(weeklyData['Time Series (Weekly)']).sort((a, b) => new Date(b[0]) - new Date(a[0]));
                 const monthlySeries = Object.entries(monthlyData['Time Series (Monthly)']).sort((a, b) => new Date(b[0]) - new Date(a[0]));
 
-                // Function to calculate RSI (14 period)
+                // Calculate Indicators
                 function calculateRSI(prices, period = 14) {
                     if (prices.length < period) return 'N/A';
                     let gains = 0, losses = 0;
-                    for (let i = 1; i < period + 1; i++) {
+                    for (let i = 1; i < period + 1 && i < prices.length; i++) {
                         const diff = prices[i - 1] - prices[i];
                         if (diff > 0) gains += diff;
                         else losses += Math.abs(diff);
                     }
                     let avgGain = gains / period;
                     let avgLoss = losses / period;
+                    if (avgLoss === 0) return 100;
                     const rs = avgGain / avgLoss;
-                    return 100 - (100 / (1 + rs));
+                    return (100 - (100 / (1 + rs))).toFixed(2);
                 }
 
-                // Function to calculate SMA
                 function calculateSMA(prices, period) {
                     if (prices.length < period) return 'N/A';
                     const sum = prices.slice(0, period).reduce((a, b) => a + b, 0);
                     return (sum / period).toFixed(2);
                 }
 
-                // Function to calculate volatility (std dev of returns)
                 function calculateVolatility(returns) {
                     if (returns.length < 2) return 'N/A';
                     const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
@@ -233,91 +314,153 @@
                     return (Math.sqrt(variance) * 100).toFixed(2);
                 }
 
-                // Function to get judgment
-                function getJudgment(rsi, trend, volatility, returnPercent) {
-                    let judgment = 'Hold';
-                    let justification = 'Neutral indicators.';
-                    if (rsi > 70 || returnPercent < -5) {
-                        judgment = 'Sell';
-                        justification = 'Overbought or negative return, potential correction.';
-                    } else if (rsi < 30 || returnPercent > 5) {
-                        judgment = 'Buy';
-                        justification = 'Oversold or positive momentum, good entry point.';
-                    }
-                    if (volatility > 5) justification += ' High volatility adds risk.';
-                    if (trend === 'Uptrend') justification += ' Positive trend.';
-                    else if (trend === 'Downtrend') justification += ' Negative trend.';
-                    return {judgment, justification};
+                function calculateProfitLoss(currentPrice, entryPrice, stopLoss, targetPrice) {
+                    const profit = ((targetPrice - entryPrice) / entryPrice * 100).toFixed(2);
+                    const loss = ((entryPrice - stopLoss) / entryPrice * 100).toFixed(2);
+                    const riskReward = profit / (loss || 1);
+                    return { profit, loss, riskReward: riskReward.toFixed(2) };
                 }
 
-                // Analyze for days (last 5 days)
+                function getJudgment(rsi, trend, volatility, returnPercent, riskReward) {
+                    let judgment = 'Hold';
+                    let justification = 'Balanced risk-reward for holding.';
+                    if ((rsi > 70 || returnPercent < -5) && riskReward < 2) {
+                        judgment = 'Sell';
+                        justification = `Overbought (RSI ${rsi}) or sharp decline (${returnPercent}%). Low risk-reward (${riskReward}). Exit to protect capital.`;
+                    } else if ((rsi < 30 || returnPercent > 5) && riskReward > 2) {
+                        judgment = 'Buy';
+                        justification = `Oversold (RSI ${rsi}) or strong momentum (${returnPercent}%). High risk-reward (${riskReward}). Good entry for profit.`;
+                    }
+                    if (volatility > 5) justification += ' High volatility increases risk.';
+                    if (trend === 'Uptrend') justification += ' Uptrend supports potential gains.';
+                    else if (trend === 'Downtrend') justification += ' Downtrend suggests caution.';
+                    return { judgment, justification };
+                }
+
+                // Daily Analysis (5 days)
                 const dayPrices = dailySeries.slice(0, 5).map(entry => parseFloat(entry[1]['4. close']));
                 const dayReturns = [];
                 for (let i = 1; i < dayPrices.length; i++) {
                     dayReturns.push((dayPrices[i-1] - dayPrices[i]) / dayPrices[i] * 100);
                 }
-                const dayRSI = calculateRSI(dayPrices);
-                const daySMA50 = calculateSMA(dayPrices, Math.min(5, dayPrices.length));
+                const dayRSI = calculateRSI(dayPrices, Math.min(5, dayPrices.length));
+                const daySMA = calculateSMA(dayPrices, Math.min(5, dayPrices.length));
                 const dayTrend = dayReturns[0] > 0 ? 'Uptrend' : 'Downtrend';
                 const dayVol = calculateVolatility(dayReturns);
-                const dayReturn = dayReturns[0].toFixed(2);
-                const dayJudgment = getJudgment(dayRSI, dayTrend, dayVol, dayReturn);
+                const dayReturn = dayReturns.reduce((a, b) => a + b, 0).toFixed(2);
+                const currentPrice = dayPrices[0];
+                const dayPL = calculateProfitLoss(currentPrice, currentPrice, currentPrice * 0.95, currentPrice * 1.05);
+                const dayJudgment = getJudgment(dayRSI, dayTrend, dayVol, dayReturn, dayPL.riskReward);
 
-                // Analyze for weeks (last 4 weeks)
+                // Weekly Analysis (4 weeks)
                 const weekPrices = weeklySeries.slice(0, 4).map(entry => parseFloat(entry[1]['4. close']));
                 const weekReturns = [];
                 for (let i = 1; i < weekPrices.length; i++) {
                     weekReturns.push((weekPrices[i-1] - weekPrices[i]) / weekPrices[i] * 100);
                 }
-                const weekRSI = calculateRSI(weekPrices);
-                const weekSMA50 = calculateSMA(weekPrices, Math.min(4, weekPrices.length));
+                const weekRSI = calculateRSI(weekPrices, Math.min(4, weekPrices.length));
+                const weekSMA = calculateSMA(weekPrices, Math.min(4, weekPrices.length));
                 const weekTrend = weekReturns[0] > 0 ? 'Uptrend' : 'Downtrend';
                 const weekVol = calculateVolatility(weekReturns);
                 const weekReturn = weekReturns.reduce((a, b) => a + b, 0).toFixed(2);
-                const weekJudgment = getJudgment(weekRSI, weekTrend, weekVol, weekReturn);
+                const weekPL = calculateProfitLoss(currentPrice, currentPrice, currentPrice * 0.90, currentPrice * 1.10);
+                const weekJudgment = getJudgment(weekRSI, weekTrend, weekVol, weekReturn, weekPL.riskReward);
 
-                // Analyze for months (last 3 months)
+                // Monthly Analysis (3 months)
                 const monthPrices = monthlySeries.slice(0, 3).map(entry => parseFloat(entry[1]['4. close']));
                 const monthReturns = [];
                 for (let i = 1; i < monthPrices.length; i++) {
                     monthReturns.push((monthPrices[i-1] - monthPrices[i]) / monthPrices[i] * 100);
                 }
-                const monthRSI = calculateRSI(monthPrices);
-                const monthSMA50 = calculateSMA(monthPrices, Math.min(3, monthPrices.length));
+                const monthRSI = calculateRSI(monthPrices, Math.min(3, monthPrices.length));
+                const monthSMA = calculateSMA(monthPrices, Math.min(3, monthPrices.length));
                 const monthTrend = monthReturns[0] > 0 ? 'Uptrend' : 'Downtrend';
                 const monthVol = calculateVolatility(monthReturns);
                 const monthReturn = monthReturns.reduce((a, b) => a + b, 0).toFixed(2);
-                const monthJudgment = getJudgment(monthRSI, monthTrend, monthVol, monthReturn);
+                const monthPL = calculateProfitLoss(currentPrice, currentPrice, currentPrice * 0.85, currentPrice * 1.15);
+                const monthJudgment = getJudgment(monthRSI, monthTrend, monthVol, monthReturn, monthPL.riskReward);
 
-                // Analyze for year (last 12 months)
+                // Yearly Analysis (12 months)
                 const yearPrices = monthlySeries.slice(0, 12).map(entry => parseFloat(entry[1]['4. close']));
                 const yearReturns = [];
                 for (let i = 1; i < yearPrices.length; i++) {
                     yearReturns.push((yearPrices[i-1] - yearPrices[i]) / yearPrices[i] * 100);
                 }
-                const yearRSI = calculateRSI(yearPrices);
-                const yearSMA50 = calculateSMA(yearPrices, Math.min(12, yearPrices.length));
+                const yearRSI = calculateRSI(yearPrices, Math.min(12, yearPrices.length));
+                const yearSMA = calculateSMA(yearPrices, Math.min(12, yearPrices.length));
                 const yearTrend = yearReturns[0] > 0 ? 'Uptrend' : 'Downtrend';
                 const yearVol = calculateVolatility(yearReturns);
                 const yearReturn = yearReturns.reduce((a, b) => a + b, 0).toFixed(2);
-                const yearJudgment = getJudgment(yearRSI, yearTrend, yearVol, yearReturn);
+                const yearPL = calculateProfitLoss(currentPrice, currentPrice, currentPrice * 0.80, currentPrice * 1.20);
+                const yearJudgment = getJudgment(yearRSI, yearTrend, yearVol, yearReturn, yearPL.riskReward);
 
-                // Render results
+                // Render Results
                 resultDiv.innerHTML = `
                     <div class="card">
-                        <div class="card-body">
-                            <h5 class="text-center">Analysis for ${fullSymbol}</h5>
-                            <div class="judgment-section buy">${dayJudgment.judgment} (Days): Return ${dayReturn}%, RSI ${dayRSI}, Vol ${dayVol}%, Trend ${dayTrend}. Justification: ${dayJudgment.justification}</div>
-                            <div class="judgment-section sell">${weekJudgment.judgment} (Weeks): Return ${weekReturn}%, RSI ${weekRSI}, Vol ${weekVol}%, Trend ${weekTrend}. Justification: ${weekJudgment.justification}</div>
-                            <div class="judgment-section hold">${monthJudgment.judgment} (Months): Return ${monthReturn}%, RSI ${monthRSI}, Vol ${monthVol}%, Trend ${monthTrend}. Justification: ${monthJudgment.justification}</div>
-                            <div class="judgment-section buy">${yearJudgment.judgment} (Year): Return ${yearReturn}%, RSI ${yearRSI}, Vol ${yearVol}%, Trend ${yearTrend}. Justification: ${yearJudgment.justification}</div>
+                        <div class="card-header">
+                            <h5 class="text-center mb-0">Profit Analysis for ${symbol}</h5>
                         </div>
+                        <div class="card-body">
+                            <div class="judgment-section ${dayJudgment.judgment.toLowerCase()}">
+                                <strong>${dayJudgment.judgment} (Days)</strong>: Return ${dayReturn}%, RSI ${dayRSI}, Volatility ${dayVol}%, Trend ${dayTrend}<br>
+                                <em>Profit/Loss</em>: +${dayPL.profit}% / -${dayPL.loss}%, Risk-Reward ${dayPL.riskReward}<br>
+                                <em>Justification</em>: ${dayJudgment.justification}
+                            </div>
+                            <div class="judgment-section ${weekJudgment.judgment.toLowerCase()}">
+                                <strong>${weekJudgment.judgment} (Weeks)</strong>: Return ${weekReturn}%, RSI ${weekRSI}, Volatility ${weekVol}%, Trend ${weekTrend}<br>
+                                <em>Profit/Loss</em>: +${weekPL.profit}% / -${weekPL.loss}%, Risk-Reward ${weekPL.riskReward}<br>
+                                <em>Justification</em>: ${weekJudgment.justification}
+                            </div>
+                            <div class="judgment-section ${monthJudgment.judgment.toLowerCase()}">
+                                <strong>${monthJudgment.judgment} (Months)</strong>: Return ${monthReturn}%, RSI ${monthRSI}, Volatility ${monthVol}%, Trend ${monthTrend}<br>
+                                <em>Profit/Loss</em>: +${monthPL.profit}% / -${monthPL.loss}%, Risk-Reward ${monthPL.riskReward}<br>
+                                <em>Justification</em>: ${monthJudgment.justification}
+                            </div>
+                            <div class="judgment-section ${yearJudgment.judgment.toLowerCase()}">
+                                <strong>${yearJudgment.judgment} (Year)</strong>: Return ${yearReturn}%, RSI ${yearRSI}, Volatility ${yearVol}%, Trend ${yearTrend}<br>
+                                <em>Profit/Loss</em>: +${yearPL.profit}% / -${yearPL.loss}%, Risk-Reward ${yearPL.riskReward}<br>
+                                <em>Justification</em>: ${yearJudgment.justification}
+                            </div>
+                            <div id="tradingview-chart"></div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3" style="font-size: 0.85em;">
+                        <i class="fas fa-info-circle"></i> Not financial advice. Use BSE if NSE fails. Wait 1-2 min if rate limit reached.
                     </div>
                 `;
 
+                // TradingView Chart
+                const chartSymbol = symbol.replace('.BSE', '').replace('.NS', '');
+                new TradingView.widget({
+                    "container_id": "tradingview-chart",
+                    "width": "100%",
+                    "height": 300,
+                    "symbol": symbol.endsWith('.NS') ? `NSE:${chartSymbol}` : `BSE:${chartSymbol}`,
+                    "interval": "D",
+                    "timezone": "Asia/Kolkata",
+                    "theme": "light",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "studies": ["BB@tv-basicstudies", "MACD@tv-basicstudies", "RSI@tv-basicstudies"],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650"
+                });
+
                 spinner.style.display = 'none';
             } catch (error) {
-                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}. Try BSE suffix, wait for rate limits, or check connection.</div>`;
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger" style="font-size: 0.9em;">
+                        Error: ${error.message}. Try:
+                        <ul>
+                            <li>Using BSE suffix (e.g., RELIANCE.BSE) or search above.</li>
+                            <li>Waiting 1-2 min for rate limits (5/min, 500/day).</li>
+                            <li>Checking internet or using a US VPN.</li>
+                            <li>Contact <a href="mailto:premium@alphavantage.co">Alpha Vantage support</a>.</li>
+                        </ul>
+                    </div>`;
                 spinner.style.display = 'none';
             }
         });
