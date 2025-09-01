@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Buffett Style Stock Analyzer (India)</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d6efd">
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,6 +48,7 @@
     ul { padding-left: 1.2rem; }
     li.good { color: green; }
     li.bad { color: red; }
+    canvas { max-width: 100%; }
   </style>
 </head>
 <body>
@@ -56,6 +57,7 @@
     <input type="text" id="searchBox" placeholder="Search NSE/BSE stock (e.g., RELIANCE, INFY)">
     <div class="results" id="results"></div>
     <div class="analysis" id="analysis"></div>
+    <canvas id="chart"></canvas>
   </main>
 
   <script>
@@ -63,44 +65,83 @@
 
     async function searchStock(query) {
       const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${query}&lang=en-IN&region=IN`;
-      const response = await fetch(PROXY + encodeURIComponent(url));
-      return await response.json();
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      return res.json();
     }
 
     async function getQuote(symbol) {
       const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-      const response = await fetch(PROXY + encodeURIComponent(url));
-      return await response.json();
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      return res.json();
     }
 
-    function buffetAnalysis(data) {
-      const quote = data.quoteResponse.result[0];
-      if (!quote) return "<p>No data available.</p>";
+    async function getFundamentals(symbol) {
+      const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=financialData,defaultKeyStatistics`;
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      return res.json();
+    }
+
+    async function getChart(symbol) {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5y&interval=1mo`;
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      return res.json();
+    }
+
+    function buffetAnalysis(priceData, fundData, symbol, name) {
+      if (!priceData.quoteResponse.result[0]) return "<p>No data available.</p>";
+
+      const q = priceData.quoteResponse.result[0];
+      const f = fundData.quoteSummary.result[0];
+
+      const pe = q.trailingPE || 0;
+      const roe = f.defaultKeyStatistics?.returnOnEquity?.raw || 0;
+      const debtEq = f.financialData?.debtToEquity?.raw || 0;
+      const profitMargin = f.financialData?.profitMargins?.raw || 0;
 
       const checks = [];
-      // Buffett-style metrics
-      const pe = quote.trailingPE || 0;
-      const roe = quote.returnOnEquity || 0;
-      const debtEq = quote.debtToEquity || 0;
-      const profitMargin = quote.profitMargins || 0;
-
-      // PE check
-      checks.push(`<li class="${pe > 0 && pe < 20 ? 'good' : 'bad'}">P/E: ${pe.toFixed(2)} (Buffett likes < 20)</li>`);
-      // ROE check
-      checks.push(`<li class="${roe > 0.15 ? 'good' : 'bad'}">ROE: ${(roe*100).toFixed(1)}% (Buffett likes > 15%)</li>`);
-      // Debt/Equity
-      checks.push(`<li class="${debtEq < 0.5 ? 'good' : 'bad'}">Debt/Equity: ${debtEq.toFixed(2)} (Buffett likes < 0.5)</li>`);
-      // Profit margin
-      checks.push(`<li class="${profitMargin > 0.1 ? 'good' : 'bad'}">Profit Margin: ${(profitMargin*100).toFixed(1)}% (Buffett likes > 10%)</li>`);
+      checks.push(`<li class="${pe > 0 && pe < 20 ? 'good':'bad'}">P/E: ${pe.toFixed(2)} (Buffett likes <20)</li>`);
+      checks.push(`<li class="${roe > 0.15 ? 'good':'bad'}">ROE: ${(roe*100).toFixed(1)}% (Buffett likes >15%)</li>`);
+      checks.push(`<li class="${debtEq < 0.5 ? 'good':'bad'}">Debt/Equity: ${debtEq.toFixed(2)} (Buffett likes <0.5)</li>`);
+      checks.push(`<li class="${profitMargin > 0.1 ? 'good':'bad'}">Profit Margin: ${(profitMargin*100).toFixed(1)}% (Buffett likes >10%)</li>`);
 
       return `
-        <h3>${quote.longName || quote.shortName} (${quote.symbol})</h3>
-        <p>Price: ₹${quote.regularMarketPrice}</p>
-        <ul>${checks.join('')}</ul>
+        <h3>${name} (${symbol})</h3>
+        <p>Price: ₹${q.regularMarketPrice}</p>
+        <ul>${checks.join("")}</ul>
       `;
     }
 
-    // Search box event
+    // Chart.js setup
+    let chartInstance;
+    function renderChart(data) {
+      const timestamps = data.chart.result[0].timestamp;
+      const prices = data.chart.result[0].indicators.quote[0].close;
+      const labels = timestamps.map(t => new Date(t*1000).toLocaleDateString("en-IN",{month:"short", year:"numeric"}));
+
+      const ctx = document.getElementById("chart").getContext("2d");
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Price (₹)",
+            data: prices,
+            borderColor: "#0d6efd",
+            backgroundColor: "rgba(13,110,253,0.1)",
+            tension: 0.2,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: false }
+          }
+        }
+      });
+    }
+
+    // UI events
     const searchBox = document.getElementById("searchBox");
     const resultsDiv = document.getElementById("results");
     const analysisDiv = document.getElementById("analysis");
@@ -114,16 +155,19 @@
       const data = await searchStock(q);
       if (!data || !data.quotes) return;
       resultsDiv.innerHTML = data.quotes.map(
-        s => `<div class="stock-item" data-symbol="${s.symbol}">${s.shortname || s.longname} (${s.symbol})</div>`
+        s => `<div class="stock-item" data-symbol="${s.symbol}" data-name="${s.shortname||s.longname}">${s.shortname||s.longname} (${s.symbol})</div>`
       ).join("");
     });
 
-    // Click on stock
     resultsDiv.addEventListener("click", async (e) => {
       if (e.target.classList.contains("stock-item")) {
         const symbol = e.target.dataset.symbol;
-        const data = await getQuote(symbol);
-        analysisDiv.innerHTML = buffetAnalysis(data);
+        const name = e.target.dataset.name;
+        const [priceData, fundData, chartData] = await Promise.all([
+          getQuote(symbol), getFundamentals(symbol), getChart(symbol)
+        ]);
+        analysisDiv.innerHTML = buffetAnalysis(priceData, fundData, symbol, name);
+        renderChart(chartData);
       }
     });
   </script>
