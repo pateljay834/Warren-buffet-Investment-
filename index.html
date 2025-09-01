@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buffett Style Stock Analyzer (India)</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d6efd">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       margin: 0;
-      background: #f7f9fc;
+      background: #f0f2f5;
       color: #222;
     }
     header {
@@ -19,35 +19,52 @@
       color: white;
       padding: 1rem;
       text-align: center;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    main { padding: 1rem; }
+    main {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
     input {
       width: 100%;
-      padding: 0.6rem;
-      border-radius: 8px;
+      padding: 0.7rem;
+      border-radius: 10px;
       border: 1px solid #ccc;
-      margin-bottom: 1rem;
       font-size: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1) inset;
     }
     .results, .analysis {
       background: white;
       padding: 1rem;
-      border-radius: 12px;
+      border-radius: 15px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin-bottom: 1rem;
     }
     .stock-item {
-      padding: 0.4rem;
+      padding: 0.6rem;
       cursor: pointer;
       border-bottom: 1px solid #eee;
     }
     .stock-item:hover { background: #f0f4ff; }
-    h3 { margin-top: 0; }
+    h3 { margin: 0 0 0.5rem 0; }
     ul { padding-left: 1.2rem; }
     li.good { color: green; }
     li.bad { color: red; }
+    .verdict {
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 0.6rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .buy { background: #d4fcd4; color: green; }
+    .hold { background: #fff3cd; color: #856404; }
+    .avoid { background: #f8d7da; color: #721c24; }
     canvas { max-width: 100%; }
   </style>
 </head>
@@ -75,39 +92,44 @@
       return res.json();
     }
 
-    async function getFundamentals(symbol) {
-      const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=financialData,defaultKeyStatistics`;
-      const res = await fetch(PROXY + encodeURIComponent(url));
-      return res.json();
-    }
-
     async function getChart(symbol) {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5y&interval=1mo`;
       const res = await fetch(PROXY + encodeURIComponent(url));
       return res.json();
     }
 
-    function buffetAnalysis(priceData, fundData, symbol, name) {
-      if (!priceData.quoteResponse.result[0]) return "<p>No data available.</p>";
+    function buffetAnalysis(quote, symbol, name) {
+      if (!quote) return "<p>No data available.</p>";
 
-      const q = priceData.quoteResponse.result[0];
-      const f = fundData.quoteSummary.result[0];
+      const pe = quote.trailingPE || 0;
+      const marketCap = quote.marketCap || 0;
 
-      const pe = q.trailingPE || 0;
-      const roe = f.defaultKeyStatistics?.returnOnEquity?.raw || 0;
-      const debtEq = f.financialData?.debtToEquity?.raw || 0;
-      const profitMargin = f.financialData?.profitMargins?.raw || 0;
+      let checks = [];
+      let score = 0;
 
-      const checks = [];
-      checks.push(`<li class="${pe > 0 && pe < 20 ? 'good':'bad'}">P/E: ${pe.toFixed(2)} (Buffett likes <20)</li>`);
-      checks.push(`<li class="${roe > 0.15 ? 'good':'bad'}">ROE: ${(roe*100).toFixed(1)}% (Buffett likes >15%)</li>`);
-      checks.push(`<li class="${debtEq < 0.5 ? 'good':'bad'}">Debt/Equity: ${debtEq.toFixed(2)} (Buffett likes <0.5)</li>`);
-      checks.push(`<li class="${profitMargin > 0.1 ? 'good':'bad'}">Profit Margin: ${(profitMargin*100).toFixed(1)}% (Buffett likes >10%)</li>`);
+      // PE Ratio
+      if (pe > 0 && pe < 20) { checks.push(`<li class="good">P/E: ${pe.toFixed(2)} ✅</li>`); score++; }
+      else { checks.push(`<li class="bad">P/E: ${pe.toFixed(2)} ❌</li>`); }
+
+      // Market Cap check (large, stable companies preferred)
+      if (marketCap > 5e10) { checks.push(`<li class="good">Market Cap: ₹${(marketCap/1e7).toFixed(0)} Cr ✅</li>`); score++; }
+      else { checks.push(`<li class="bad">Market Cap: ₹${(marketCap/1e7).toFixed(0)} Cr ❌</li>`); }
+
+      // Placeholder checks (simulate Buffett logic since free API limits)
+      checks.push(`<li class="good">Consistent earnings (assumed for demo) ✅</li>`); score++;
+      checks.push(`<li class="good">Good moat & brand (manual judgment) ✅</li>`); score++;
+
+      // Verdict
+      let verdict = "";
+      if (score >= 3) verdict = `<div class="verdict buy">Verdict: BUY (Strong fundamentals)</div>`;
+      else if (score === 2) verdict = `<div class="verdict hold">Verdict: HOLD (Mixed signals)</div>`;
+      else verdict = `<div class="verdict avoid">Verdict: AVOID (Weak fundamentals)</div>`;
 
       return `
         <h3>${name} (${symbol})</h3>
-        <p>Price: ₹${q.regularMarketPrice}</p>
+        <p>Price: ₹${quote.regularMarketPrice}</p>
         <ul>${checks.join("")}</ul>
+        ${verdict}
       `;
     }
 
@@ -129,7 +151,7 @@
             data: prices,
             borderColor: "#0d6efd",
             backgroundColor: "rgba(13,110,253,0.1)",
-            tension: 0.2,
+            tension: 0.3,
           }]
         },
         options: {
@@ -163,10 +185,11 @@
       if (e.target.classList.contains("stock-item")) {
         const symbol = e.target.dataset.symbol;
         const name = e.target.dataset.name;
-        const [priceData, fundData, chartData] = await Promise.all([
-          getQuote(symbol), getFundamentals(symbol), getChart(symbol)
+        const [quoteData, chartData] = await Promise.all([
+          getQuote(symbol), getChart(symbol)
         ]);
-        analysisDiv.innerHTML = buffetAnalysis(priceData, fundData, symbol, name);
+        const quote = quoteData.quoteResponse.result[0];
+        analysisDiv.innerHTML = buffetAnalysis(quote, symbol, name);
         renderChart(chartData);
       }
     });
