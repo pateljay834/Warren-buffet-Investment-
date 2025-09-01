@@ -1,742 +1,131 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Buffett-Style Stock Analyst — Single File PWA</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buffett Style Stock Analyzer (India)</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d6efd">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <meta name="theme-color" content="#0ea5e9">
   <style>
-    :root{
-      --bg:#071021; --card:#0f1724; --accent:#0ea5e9; --muted:#94a3b8; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
-      --glass: rgba(255,255,255,0.03);
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f7f9fc;
+      color: #222;
     }
-    *{box-sizing:border-box}
-    body{ margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,#041021 0%, #071621 60%); color:#e6eef8; min-height:100vh; padding:20px; }
-    .app{ max-width:1100px; margin:0 auto; }
-    header{ display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .brand{ font-weight:800; letter-spacing:.6px; display:flex; gap:10px; align-items:center; }
-    .brand .logo{ width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,#0ea5e9,#06b6d4); display:flex; align-items:center; justify-content:center; font-weight:900; color:#00121a; }
-    .searchWrap{ display:flex; gap:10px; align-items:center; flex:1; margin-left:18px; }
-    input[type="search"]{ width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; outline:none; }
-    button{ background:var(--accent); color:#00121a; padding:10px 12px; border-radius:10px; border:0; font-weight:700; cursor:pointer; }
-    .suggestions{ position:relative; }
-    .list{ position:absolute; left:0; right:0; top:46px; background:#071621; border:1px solid rgba(255,255,255,0.04); border-radius:10px; overflow:hidden; z-index:30; max-height:300px; overflow:auto; }
-    .item{ padding:10px 12px; display:flex; justify-content:space-between; gap:12px; align-items:center; border-bottom:1px solid rgba(255,255,255,0.02); cursor:pointer; }
-    .item:hover{ background:rgba(255,255,255,0.02); }
-    .muted{ color:var(--muted); font-size:13px; }
-    .grid{ display:grid; grid-template-columns: repeat(12,1fr); gap:12px; margin-top:16px; }
-    .card{ background: linear-gradient(180deg,#081424 0%, #061121 100%); border-radius:12px; padding:12px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.02); }
-    .card.col-4{ grid-column: span 4; }
-    .card.col-6{ grid-column: span 6; }
-    .card.col-12{ grid-column: 1 / -1; }
-    .title{ font-weight:800; font-size:16px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .kv{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
-    .bigVal{ font-weight:800; font-size:28px; margin-top:6px; }
-    .badge{ background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:999px; font-size:13px; color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
-    canvas{ width:100% !important; height:260px !important; }
-    textarea{ width:100%; min-height:110px; background:transparent; color:inherit; border:1px solid rgba(255,255,255,0.03); border-radius:8px; padding:10px; margin-top:8px; }
-    .small{font-size:13px;color:var(--muted)}
-    .checklist td, .checklist th{ padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,0.02); font-size:14px; }
-    table{ width:100%; border-collapse:collapse; }
-    footer{ margin-top:18px; font-size:13px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-    .watchlist{ display:flex; gap:8px; flex-wrap:wrap; }
-    .pill{ padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); cursor:pointer; }
-    .controls{ display:flex; gap:8px; align-items:center; }
-    .notearea{ font-size:14px; color:var(--muted); }
-    .scoreBig{ font-size:40px; font-weight:900; color:var(--accent); }
-    .green{ color:var(--ok); } .red{ color:var(--bad); } .amber{ color:var(--warn); }
-    .muted-block{ color:var(--muted); font-size:13px; margin-top:8px; }
-    @media (max-width:900px){
-      .grid{ grid-template-columns: repeat(6,1fr); }
-      .card.col-4{ grid-column: span 6; }
-      .card.col-6{ grid-column: span 6; }
+    header {
+      background: linear-gradient(135deg, #0d6efd, #007bff);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
     }
+    main { padding: 1rem; }
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .results, .analysis {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .stock-item {
+      padding: 0.4rem;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    .stock-item:hover { background: #f0f4ff; }
+    h3 { margin-top: 0; }
+    ul { padding-left: 1.2rem; }
+    li.good { color: green; }
+    li.bad { color: red; }
   </style>
-
-  <!-- PWA manifest (inline) -->
-  <link rel="manifest" href="#manifest-placeholder">
-  <script>
-    // Manifest will be injected by JS (single-file PWA)
-  </script>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">
-        <div class="logo">B</div>
-        <div>
-          Buffett-Style Analyst
-          <div class="muted">India — single-file PWA</div>
-        </div>
-      </div>
+  <header>Buffett Style Stock Analyzer</header>
+  <main>
+    <input type="text" id="searchBox" placeholder="Search NSE/BSE stock (e.g., RELIANCE, INFY)">
+    <div class="results" id="results"></div>
+    <div class="analysis" id="analysis"></div>
+  </main>
 
-      <div class="searchWrap">
-        <div style="flex:1; position:relative;">
-          <input id="q" type="search" placeholder="Search NSE / BSE (e.g. RELIANCE, INFY, HDFCBANK) — wait 0.3s after typing" autocomplete="off" />
-          <div id="suggestions" class="list" style="display:none;"></div>
-        </div>
-        <div class="controls">
-          <button id="addWatch">+ Watch</button>
-          <button id="refreshBtn">Refresh</button>
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <div id="main-area">
-        <div class="card col-12">
-          <div class="title"><div>Start by searching for a stock</div><div class="small">Data: Yahoo Finance (public)</div></div>
-        </div>
-      </div>
-
-      <div class="grid" style="display:none;" id="stockGrid">
-        <!-- Left column: summary -->
-        <div class="card col-6" id="summaryCard">
-          <div class="title"><div id="fullname">—</div><div id="symbol" class="badge">—</div></div>
-
-          <div class="kv">
-            <div>
-              <div class="bigVal" id="lastPrice">—</div>
-              <div class="muted">Previous close / Change <span id="chg">—</span></div>
-            </div>
-            <div style="text-align:right">
-              <div class="muted">Market Cap</div>
-              <div id="mcap" class="bigVal">—</div>
-            </div>
-          </div>
-
-          <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.03); margin:12px 0;" />
-
-          <div style="display:flex; gap:8px;">
-            <div style="flex:1">
-              <div class="muted">P/E (TTM)</div><div id="pe" class="bigVal">—</div>
-            </div>
-            <div style="flex:1">
-              <div class="muted">ROE</div><div id="roe" class="bigVal">—</div>
-            </div>
-            <div style="flex:1">
-              <div class="muted">Debt / Equity</div><div id="de" class="bigVal">—</div>
-            </div>
-          </div>
-
-          <div style="margin-top:12px;">
-            <div class="muted">Profit Margin</div>
-            <div id="pm" class="muted-block">—</div>
-          </div>
-
-          <div style="margin-top:8px;">
-            <div class="muted">Management & Notes</div>
-            <textarea id="notes" placeholder="Write your thesis: management quality, moat, competitive advantages, risks..."></textarea>
-          </div>
-        </div>
-
-        <!-- Right column: score & checklist -->
-        <div class="card col-6" id="scoreCard">
-          <div class="title">
-            <div>Buffett Principles Analysis</div>
-            <div class="small">Quick, rule-based</div>
-          </div>
-
-          <div style="display:flex; gap:12px; align-items:center; margin-top:12px;">
-            <div style="flex:1">
-              <div class="muted">Buffett Score</div>
-              <div class="scoreBig" id="buffettScore">—</div>
-            </div>
-
-            <div style="width:120px;">
-              <div class="muted">Recommendation</div>
-              <div id="recommendation" class="badge" style="font-weight:800; margin-top:6px;">—</div>
-            </div>
-          </div>
-
-          <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.03); margin:12px 0;" />
-
-          <div>
-            <table class="checklist">
-              <thead><tr><th>Check</th><th>Status</th><th>Value</th></tr></thead>
-              <tbody>
-                <tr><td>Return on Equity (quality)</td><td id="c_roe">—</td><td id="v_roe">—</td></tr>
-                <tr><td>Profit Margin (durability)</td><td id="c_pm">—</td><td id="v_pm">—</td></tr>
-                <tr><td>Debt / Equity (safety)</td><td id="c_de">—</td><td id="v_de">—</td></tr>
-                <tr><td>Free Cash Flow (consistency)</td><td id="c_fcf">—</td><td id="v_fcf">—</td></tr>
-                <tr><td>Revenue CAGR (growth)</td><td id="c_cagr">—</td><td id="v_cagr">—</td></tr>
-                <tr><td>Valuation (P/E)</td><td id="c_pe">—</td><td id="v_pe">—</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div style="margin-top:10px;">
-            <div class="muted">Intrinsic Value Helpers</div>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-              <div style="flex:1;">
-                <div class="small muted">Graham Intrinsic (EPS * (8.5 + 2*g))</div>
-                <input id="grahamGrowth" placeholder="Est. growth % (e.g., 12)" style="width:100%; padding:8px; margin-top:6px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:inherit;" />
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                  <button id="calcGraham">Calc Graham</button>
-                  <div id="grahamVal" class="badge" style="margin-left:auto">—</div>
-                </div>
-              </div>
-
-              <div style="flex:1;">
-                <div class="small muted">Simple DCF (Gordon)</div>
-                <input id="dcfFcf" placeholder="Latest annual FCF" style="width:100%; padding:8px; margin-top:6px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:inherit;" />
-                <input id="dcfG" placeholder="g% (e.g., 6)" style="width:100%; padding:8px; margin-top:6px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:inherit;" />
-                <input id="dcfR" placeholder="Discount r% (e.g., 10)" style="width:100%; padding:8px; margin-top:6px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:inherit;" />
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                  <button id="calcDcf">Calc DCF</button>
-                  <div id="dcfVal" class="badge" style="margin-left:auto">—</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Chart -->
-        <div class="card col-12">
-          <div class="title"><div>Price Trend (5 years)</div><div class="small">Weekly closes</div></div>
-          <canvas id="chart"></canvas>
-        </div>
-
-        <!-- Financial quick view and watchlist -->
-        <div class="card col-6">
-          <div class="title"><div>Quick Financials</div><div class="small">Use for verification</div></div>
-          <div style="margin-top:8px;">
-            <div class="muted">Revenue (TTM) / Net Income (TTM)</div>
-            <div id="revenues" class="muted-block">—</div>
-
-            <div style="margin-top:8px;" class="muted">Trailing 3-4 yrs FCF snapshot</div>
-            <div id="fcf_snap" class="muted-block">—</div>
-          </div>
-        </div>
-
-        <div class="card col-6">
-          <div class="title"><div>Watchlist & Notes</div><div class="small">Local only</div></div>
-          <div style="margin-top:8px;">
-            <div style="display:flex; gap:8px;">
-              <input id="watchNote" placeholder="note for this watch (optional)" style="flex:1; padding:8px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.03);" />
-              <button id="saveWatch">Save</button>
-            </div>
-
-            <div style="margin-top:10px;" id="watchListArea"></div>
-          </div>
-        </div>
-
-      </div>
-
-    </main>
-
-    <footer>
-      <div>Made for personal use • Data from Yahoo Finance public endpoints • Cross-check with official filings before trading.</div>
-      <div class="watchlist" id="watchPills"></div>
-    </footer>
-
-  </div>
-
-  <!-- Service Worker registration & main JS -->
   <script>
-  /*******************************
-   * CONFIG
-   *
-   * PROXY: If you experience CORS errors in the browser, set PROXY to:
-   *  - your Cloudflare Worker URL (recommended), e.g. "https://yourname.workers.dev/?url="
-   *  - OR a public CORS proxy (less reliable) like "https://api.allorigins.win/raw?url=" (subject to rate limits)
-   *
-   * If empty '', app will attempt direct calls to Yahoo Finance endpoints.
-   *******************************/
-  const PROXY = ''; // <-- edit this in the file if needed
+    const PROXY = "https://api.allorigins.win/raw?url=";
 
-  // Utility
-  const $ = id => document.getElementById(id);
-  const fmt = n => {
-    if (n==null || isNaN(n)) return '—';
-    if (Math.abs(n) >= 1e12) return (n/1e12).toFixed(2)+'T';
-    if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(2)+'B';
-    if (Math.abs(n) >= 1e7) return (n/1e7).toFixed(2)+'Cr';
-    if (Math.abs(n) >= 1e5) return (n/1e5).toFixed(2)+'L';
-    return new Intl.NumberFormat('en-IN').format(n);
-  }
-  const pct = (v) => (v==null||isNaN(v)) ? '—' : (v*100).toFixed(2)+'%';
-
-  // Small helpers for requests
-  async function proxyFetch(url){
-    // If PROXY set to a wrapper that expects the original URL in `url` param
-    if (PROXY){
-      // If PROXY ends with ?url= or just a worker base, we combine intelligently
-      if (PROXY.includes('{url}')) {
-        return fetch(PROXY.replace('{url}', encodeURIComponent(url)));
-      }
-      // if PROXY ends with = or ?url= expected
-      if (PROXY.endsWith('=') || PROXY.includes('?url=')) {
-        return fetch(PROXY + encodeURIComponent(url));
-      }
-      // else assume PROXY is worker base where we append path /api/...
-      // Some users may deploy the earlier worker and use like: https://xxx.workers.dev/api/summary?symbol=...
-      // So if PROXY contains 'workers.dev' assume it's full worker URL and use it as prefix
-      try {
-        const u = new URL(url);
-        // send through as a full GET param to worker if provided
-        return fetch(PROXY + '?url=' + encodeURIComponent(url));
-      } catch(e){
-        return fetch(url);
-      }
-    } else {
-      return fetch(url);
+    async function searchStock(query) {
+      const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${query}&lang=en-IN&region=IN`;
+      const response = await fetch(PROXY + encodeURIComponent(url));
+      return await response.json();
     }
-  }
 
-  // Yahoo endpoints
-  function y_search(q){ return `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&lang=en-IN&region=IN`; }
-  function y_quote(symbol){ return `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`; }
-  function y_summary(symbol){ return `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=price,summaryDetail,defaultKeyStatistics,financialData,assetProfile`; }
-  function y_financials(symbol){ return `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory`; }
-  function y_chart(symbol, range='5y', interval='1wk'){ return `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}`; }
-
-  // DOM
-  const qInput = $('q'), suggestions = $('suggestions'), addWatchBtn = $('addWatch'), refreshBtn = $('refreshBtn'), mainArea = $('main-area'),
-        stockGrid = $('stockGrid');
-
-  let chartInstance = null;
-  let current = null;
-
-  // Typeahead
-  let debounceTimer = null;
-  qInput.addEventListener('input', (e)=>{
-    const v = e.target.value.trim();
-    clearTimeout(debounceTimer);
-    if (!v || v.length < 2){ suggestions.style.display='none'; suggestions.innerHTML=''; return; }
-    debounceTimer = setTimeout(()=> doSearch(v), 300);
-  });
-
-  async function doSearch(q){
-    suggestions.style.display='none';
-    suggestions.innerHTML = '<div class="item"><div class="muted">Searching…</div></div>';
-    try{
-      const r = await proxyFetch(y_search(q));
-      const j = await r.json();
-      const quotes = j.quotes || j.hits || [];
-      // prefer NSE (.NS) then BSE (.BO)
-      const filtered = (quotes.filter(s => (s.symbol && (s.symbol.endsWith('.NS')||s.symbol.endsWith('.BO')))));
-      const mapped = filtered.map(s => ({
-        symbol: s.symbol,
-        name: s.longname || s.shortname || s.name || s.displayName || s.exchange,
-        exch: s.exchDisp || s.exchange || ''
-      }));
-      showSuggestions(mapped.slice(0,12));
-    } catch(err){
-      console.error(err);
-      suggestions.innerHTML = '<div class="item"><div class="muted">Search failed (CORS or network). If blocked, set PROXY in the file.</div></div>';
-      suggestions.style.display='block';
+    async function getQuote(symbol) {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+      const response = await fetch(PROXY + encodeURIComponent(url));
+      return await response.json();
     }
-  }
 
-  function showSuggestions(list){
-    suggestions.innerHTML = '';
-    if (!list.length) { suggestions.innerHTML = '<div class="item"><div class="muted">No results</div></div>'; suggestions.style.display='block'; return; }
-    list.forEach(it=>{
-      const d = document.createElement('div'); d.className='item';
-      d.innerHTML = `<div style="font-weight:700">${escapeHtml(it.name||it.symbol)}</div><div class="muted">${escapeHtml(it.symbol)} · ${escapeHtml(it.exch)}</div>`;
-      d.onclick = ()=> selectSymbol(it);
-      suggestions.appendChild(d);
+    function buffetAnalysis(data) {
+      const quote = data.quoteResponse.result[0];
+      if (!quote) return "<p>No data available.</p>";
+
+      const checks = [];
+      // Buffett-style metrics
+      const pe = quote.trailingPE || 0;
+      const roe = quote.returnOnEquity || 0;
+      const debtEq = quote.debtToEquity || 0;
+      const profitMargin = quote.profitMargins || 0;
+
+      // PE check
+      checks.push(`<li class="${pe > 0 && pe < 20 ? 'good' : 'bad'}">P/E: ${pe.toFixed(2)} (Buffett likes < 20)</li>`);
+      // ROE check
+      checks.push(`<li class="${roe > 0.15 ? 'good' : 'bad'}">ROE: ${(roe*100).toFixed(1)}% (Buffett likes > 15%)</li>`);
+      // Debt/Equity
+      checks.push(`<li class="${debtEq < 0.5 ? 'good' : 'bad'}">Debt/Equity: ${debtEq.toFixed(2)} (Buffett likes < 0.5)</li>`);
+      // Profit margin
+      checks.push(`<li class="${profitMargin > 0.1 ? 'good' : 'bad'}">Profit Margin: ${(profitMargin*100).toFixed(1)}% (Buffett likes > 10%)</li>`);
+
+      return `
+        <h3>${quote.longName || quote.shortName} (${quote.symbol})</h3>
+        <p>Price: ₹${quote.regularMarketPrice}</p>
+        <ul>${checks.join('')}</ul>
+      `;
+    }
+
+    // Search box event
+    const searchBox = document.getElementById("searchBox");
+    const resultsDiv = document.getElementById("results");
+    const analysisDiv = document.getElementById("analysis");
+
+    searchBox.addEventListener("input", async () => {
+      const q = searchBox.value.trim();
+      if (q.length < 2) {
+        resultsDiv.innerHTML = "";
+        return;
+      }
+      const data = await searchStock(q);
+      if (!data || !data.quotes) return;
+      resultsDiv.innerHTML = data.quotes.map(
+        s => `<div class="stock-item" data-symbol="${s.symbol}">${s.shortname || s.longname} (${s.symbol})</div>`
+      ).join("");
     });
-    suggestions.style.display='block';
-  }
 
-  function escapeHtml(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-
-  async function selectSymbol(item){
-    suggestions.style.display='none';
-    qInput.value = item.name || item.symbol;
-    await loadStock(item.symbol, item.name);
-  }
-
-  // Load all data for symbol
-  async function loadStock(symbol, displayName){
-    try{
-      stockGrid.style.display='none';
-      mainArea.querySelector('.card') && mainArea.querySelector('.card').remove();
-      showLoading();
-      // fetch concurrently
-      const [qResp, sResp, fResp, cResp] = await Promise.allSettled([
-        proxyFetch(y_quote(symbol)),
-        proxyFetch(y_summary(symbol)),
-        proxyFetch(y_financials(symbol)),
-        proxyFetch(y_chart(symbol, '5y', '1wk'))
-      ]);
-
-      const quoteJson = qResp.status==='fulfilled' ? await safeJson(qResp.value) : null;
-      const summaryJson = sResp.status==='fulfilled' ? await safeJson(sResp.value) : null;
-      const finJson = fResp.status==='fulfilled' ? await safeJson(fResp.value) : null;
-      const chartJson = cResp.status==='fulfilled' ? await safeJson(cResp.value) : null;
-
-      const quote = quoteJson?.quoteResponse?.result?.[0] || {};
-      const summary = summaryJson?.quoteSummary?.result?.[0] || {};
-      const financials = finJson?.quoteSummary?.result?.[0] || {};
-
-      current = { symbol, quote, summary, financials, chartJson, displayName };
-
-      renderAll();
-    } catch(err){
-      console.error(err);
-      alert('Failed to load stock data. See console. If you see CORS errors, set PROXY at the top of the file to a CORS proxy or your Cloudflare Worker URL.');
-      hideLoading();
-    }
-  }
-
-  function showLoading(){
-    const el = document.createElement('div');
-    el.className='card col-12';
-    el.id='loadingCard';
-    el.innerHTML = '<div class="title"><div>Loading data…</div><div class="muted">This can take a couple seconds</div></div>';
-    mainArea.appendChild(el);
-  }
-  function hideLoading(){ const l = $('loadingCard'); if (l) l.remove(); }
-
-  async function safeJson(resp){
-    try {
-      return await resp.json();
-    } catch(e){
-      // some endpoints return text or HTML when blocked — rethrow
-      const txt = await resp.text().catch(()=> '');
-      throw new Error('Response not json: ' + txt.slice(0,200));
-    }
-  }
-
-  // Rendering
-  function renderAll(){
-    hideLoading();
-    if (!current) return;
-    stockGrid.style.display='grid';
-    const symbol = current.symbol;
-    const quote = current.quote;
-    const summary = current.summary;
-    const fin = current.financials;
-    const chart = current.chartJson;
-
-    // Summary vars
-    const price = quote.regularMarketPrice ?? quote.regularMarketPreviousClose ?? quote.regularMarketOpen;
-    const prev = quote.regularMarketPreviousClose ?? null;
-    const chg = price && prev ? (price - prev) : null;
-    const mcap = quote.marketCap ?? null;
-    const pe = (summary?.summaryDetail?.trailingPE?.raw) ?? (quote.trailingPE) ?? null;
-    const dividendYield = summary?.summaryDetail?.dividendYield?.raw ?? null;
-    const roe = (summary?.defaultKeyStatistics?.returnOnEquity?.raw) ?? (summary?.financialData?.returnOnEquity?.raw) ?? null;
-    const profitMargin = (summary?.summaryDetail?.profitMargins?.raw) ?? (summary?.financialData?.profitMargins?.raw) ?? null;
-    const debtToEquity = summary?.defaultKeyStatistics?.debtToEquity?.raw ?? null;
-
-    $('fullname').textContent = current.displayName || (summary?.price?.longName || quote.longName || quote.shortName || symbol);
-    $('symbol').textContent = symbol;
-    $('lastPrice').textContent = (price!=null) ? (typeof price === 'number' ? '₹ ' + fmt(price) : price) : '—';
-    $('chg').textContent = (chg!=null) ? ( (chg>=0?'+':'') + (chg.toFixed(2)) ) : '—';
-    $('mcap').textContent = mcap ? fmt(mcap) : '—';
-    $('pe').textContent = pe ? (Number.isFinite(pe) ? pe.toFixed(2) : pe) : '—';
-    $('roe').textContent = roe!=null ? pct(roe) : '—';
-    $('de').textContent = debtToEquity!=null ? (debtToEquity.toFixed? debtToEquity.toFixed(2) : debtToEquity) : '—';
-    $('pm').textContent = profitMargin!=null ? pct(profitMargin) : '—';
-
-    // Checklist decisions (heuristic rules)
-    const checks = {};
-    checks.roe = (roe!=null && roe > 0.15);
-    checks.pm = (profitMargin!=null && profitMargin > 0.12);
-    checks.de = (debtToEquity!=null && debtToEquity < 100);
-    // FCF: try to compute from cashflow statement history
-    const cashflows = (fin?.cashflowStatementHistory?.cashflowStatements || []).slice(0,4).map(c => {
-      // sum operating cash + capex (capex is negative usually) => free cash flow approx
-      const op = (c?.totalCashFromOperatingActivities?.raw ?? null);
-      const cap = (c?.capitalExpenditures?.raw ?? null);
-      const fcf = ( (op!=null ? op : 0) + (cap!=null ? cap : 0) );
-      return { op, cap, fcf };
-    });
-    const allPositiveFcf = cashflows.length>0 && cashflows.every(x => typeof x.fcf==='number' && x.fcf > 0);
-    const improvingFcf = cashflows.length>1 && cashflows[0].fcf <= cashflows[cashflows.length-1].fcf;
-    checks.fcf = allPositiveFcf && improvingFcf;
-
-    // Revenue CAGR (3 yrs)
-    const revs = (fin?.incomeStatementHistory?.incomeStatementHistory || []).slice(0,4).reverse();
-    let cagr = null;
-    if (revs.length >= 2) {
-      const first = revs[0]?.totalRevenue?.raw;
-      const last = revs[revs.length-1]?.totalRevenue?.raw;
-      if (first && last && first>0){
-        const n = revs.length - 1;
-        cagr = Math.pow(last/first, 1/n) - 1;
-      }
-    }
-    checks.cagr = (cagr != null && cagr > 0.06);
-
-    // Valuation check (PE)
-    checks.pe = (pe != null && pe < 25);
-
-    // Build buffett score (heuristic)
-    let score = 0;
-    if (roe!=null){ score += (roe>0.20?20: roe>0.15?15: roe>0.1?8:0); }
-    if (profitMargin!=null){ score += (profitMargin>0.18?15: profitMargin>0.12?10: profitMargin>0.08?6:0); }
-    if (debtToEquity!=null){ score += (debtToEquity<50?15: debtToEquity<100?8: debtToEquity<150?4:0); }
-    if (pe!=null && pe>0){ score += (pe<15?12: pe<25?8: pe<35?4:0); }
-    if (checks.fcf) score += 18;
-    if (cagr!=null){ score += (cagr>0.15?12: cagr>0.10?8: cagr>0.06?5:0); }
-    score = Math.min(100, Math.round(score));
-
-    $('buffettScore').textContent = score;
-    $('recommendation').textContent = (score >= 70 && checks.pe) ? 'BUY' : (score >= 55 ? 'HOLD' : 'REVIEW');
-    $('recommendation').className = 'badge ' + (score>=70 && checks.pe ? 'green' : (score>=55 ? 'amber' : 'red'));
-
-    // Fill checklist rows
-    $('c_roe').textContent = checks.roe ? '✅' : '❌'; $('v_roe').textContent = roe!=null ? pct(roe) : '—';
-    $('c_pm').textContent = checks.pm ? '✅' : '❌'; $('v_pm').textContent = profitMargin!=null ? pct(profitMargin) : '—';
-    $('c_de').textContent = checks.de ? '✅' : '❌'; $('v_de').textContent = debtToEquity!=null ? (debtToEquity.toFixed?debtToEquity.toFixed(2):debtToEquity) : '—';
-    $('c_fcf').textContent = checks.fcf ? '✅' : '⚠️'; $('v_fcf').textContent = cashflows.length ? cashflows.map(x=> x.fcf && (x.fcf>=0 ? '₹ '+fmt(x.fcf) : '₹-'+fmt(Math.abs(x.fcf)))).join(' | ') : '—';
-    $('c_cagr').textContent = checks.cagr ? '✅' : '⚠️'; $('v_cagr').textContent = cagr!=null ? ( (cagr*100).toFixed(2) + '%' ) : '—';
-    $('c_pe').textContent = checks.pe ? '✅' : '⚠️'; $('v_pe').textContent = pe!=null ? (Number.isFinite(pe) ? pe.toFixed(2) : pe) : '—';
-
-    // Quick financials
-    const revTtm = summary?.financialData?.totalRevenue?.raw ?? (fin?.incomeStatementHistory?.incomeStatementHistory?.[0]?.totalRevenue?.raw ?? null);
-    const netInc = summary?.financialData?.netIncomeToCommon?.raw ?? (fin?.incomeStatementHistory?.incomeStatementHistory?.[0]?.netIncome?.raw ?? null);
-    $('revenues').textContent = (revTtm!=null? '₹ '+fmt(revTtm) : '—') + ' / ' + (netInc!=null? '₹ '+fmt(netInc) : '—');
-
-    $('fcf_snap').textContent = cashflows.length ? cashflows.map((c,i)=> `Y${i+1}: ${c.fcf!=null? '₹'+fmt(c.fcf) : '—'}`).join('  |  ') : '—';
-
-    // Chart rendering
-    renderChart(chart);
-
-    // Notes and watchlist
-    loadWatchlist();
-    current.score = score;
-    current.cagr = cagr;
-    current.fcf_sample = cashflows;
-    current.pe = pe;
-    current.roe = roe;
-    current.profitMargin = profitMargin;
-
-    // prefill dcf inputs
-    // dcfFcf default: latest positive FCF or net income
-    const latestFcf = cashflows[0]?.fcf ?? netInc ?? 0;
-    $('dcfFcf').value = latestFcf ? Math.round(latestFcf) : '';
-  }
-
-  function renderChart(chartJson){
-    const ctx = document.getElementById('chart').getContext('2d');
-    const res = chartJson?.chart?.result?.[0];
-    let series = [];
-    if (res){
-      const closes = res.indicators?.quote?.[0]?.close || [];
-      const timestamps = res.timestamp || [];
-      series = closes.map((c, i) => ({ t: timestamps[i]*1000, c })).filter(x=>x.c!=null);
-    }
-    const labels = series.map(s => new Date(s.t).toLocaleDateString('en-IN'));
-    const data = series.map(s => s.c);
-
-    if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: current.symbol + ' price',
-          data,
-          tension: 0.2,
-          borderWidth: 2,
-          pointRadius: 0
-        }]
-      },
-      options: {
-        plugins:{ legend:{ display:false } },
-        scales: {
-          x: { display: true },
-          y: { display: true, ticks: { callback: function(v){ return '₹ ' + v } } }
-        },
-        responsive: true,
-        maintainAspectRatio: false
+    // Click on stock
+    resultsDiv.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("stock-item")) {
+        const symbol = e.target.dataset.symbol;
+        const data = await getQuote(symbol);
+        analysisDiv.innerHTML = buffetAnalysis(data);
       }
     });
-  }
-
-  // Graham calc
-  $('calcGraham').addEventListener('click', ()=>{
-    if (!current) return alert('Load a stock first');
-    const g = parseFloat($('grahamGrowth').value);
-    // EPS: try summary.defaultKeyStatistics.trailingEps or financialData.ebitda? fallbacks
-    const eps = current.summary?.defaultKeyStatistics?.trailingEps?.raw ?? current.quote?.epsTrailingTwelveMonths ?? null;
-    if (!eps) return alert('EPS not found in data; Graham needs EPS');
-    const val = eps * (8.5 + 2 * (isNaN(g)? 0 : g));
-    $('grahamVal').textContent = '₹ ' + Math.round(val);
-  });
-
-  // DCF/Gordon calc
-  $('calcDcf').addEventListener('click', ()=>{
-    const fcf = parseFloat($('dcfFcf').value);
-    const g = parseFloat($('dcfG').value)/100;
-    const r = parseFloat($('dcfR').value)/100;
-    if (!fcf || !isFinite(g) || !isFinite(r) || r <= g) return alert('Enter valid FCF, g < r. Example: FCF: 1000000000, g:6, r:10');
-    const val = (fcf * (1 + g)) / (r - g);
-    $('dcfVal').textContent = '₹ ' + Math.round(val);
-  });
-
-  // Watchlist (localStorage)
-  function loadWatchlist(){
-    const area = $('watchListArea');
-    area.innerHTML = '';
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('watch_'));
-    if (!keys.length) { area.innerHTML = '<div class="muted">No saved watches</div>'; renderWatchPills(); return; }
-    keys.forEach(k => {
-      try {
-        const obj = JSON.parse(localStorage.getItem(k));
-        const wrap = document.createElement('div'); wrap.style.display='flex'; wrap.style.justifyContent='space-between'; wrap.style.alignItems='center'; wrap.style.marginTop='8px';
-        wrap.innerHTML = `<div><div style="font-weight:800">${escapeHtml(obj.name)}</div><div class="muted">${escapeHtml(obj.symbol)} • ${obj.note? escapeHtml(obj.note) : ''}</div></div>
-                          <div style="display:flex;gap:8px"><button class="pill" data-k="${k}">Open</button><button class="pill" data-del="${k}">Delete</button></div>`;
-        area.appendChild(wrap);
-      } catch(e){}
-    });
-    // hook buttons
-    area.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', (ev)=>{
-      const obj = JSON.parse(localStorage.getItem(b.dataset.k));
-      selectSymbol({ symbol: obj.symbol, name: obj.name, exch: obj.exch });
-    }));
-    area.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', (ev)=>{
-      if (!confirm('Delete watch?')) return;
-      localStorage.removeItem(b.dataset.del);
-      loadWatchlist();
-    }));
-    renderWatchPills();
-  }
-
-  function renderWatchPills(){
-    const wrap = $('watchPills'); wrap.innerHTML='';
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('watch_'));
-    keys.forEach(k => {
-      try {
-        const obj = JSON.parse(localStorage.getItem(k));
-        const pill = document.createElement('div'); pill.className='pill'; pill.textContent = obj.symbol; pill.onclick = ()=> selectSymbol({ symbol: obj.symbol, name: obj.name });
-        wrap.appendChild(pill);
-      } catch(e){}
-    });
-  }
-
-  $('saveWatch').addEventListener('click', ()=>{
-    if (!current) return alert('Load a stock first');
-    const note = $('watchNote').value || '';
-    const obj = { symbol: current.symbol, name: $('fullname').textContent, exch: current.quote?.fullExchangeName || '', note };
-    const key = 'watch_' + obj.symbol;
-    localStorage.setItem(key, JSON.stringify(obj));
-    loadWatchlist();
-    alert('Saved to watchlist (local only)');
-  });
-
-  addWatchBtn.addEventListener('click', ()=>{
-    if (!current) return alert('Load a stock first');
-    const note = $('watchNote').value || '';
-    const obj = { symbol: current.symbol, name: $('fullname').textContent, exch: current.quote?.fullExchangeName || '', note };
-    localStorage.setItem('watch_' + obj.symbol, JSON.stringify(obj));
-    loadWatchlist();
-  });
-
-  refreshBtn.addEventListener('click', ()=>{
-    if (!current) return alert('Load a stock first');
-    loadStock(current.symbol, current.displayName);
-  });
-
-  // Small UX: pressing enter in search tries to fetch exact symbol or best hit
-  qInput.addEventListener('keydown', (e)=>{
-    if (e.key === 'Enter') {
-      const v = qInput.value.trim();
-      if (!v) return;
-      // If input already contains dot-suffix like .NS or .BO assume symbol, else try search then pick top hit
-      if (/\.(NS|BO)$/i.test(v)) {
-        selectSymbol({ symbol: v.toUpperCase(), name: v.toUpperCase() });
-      } else {
-        // try search and pick top
-        (async ()=> {
-          try {
-            const r = await proxyFetch(y_search(v));
-            const j = await r.json();
-            const quotes = j.quotes || [];
-            const preferred = quotes.find(q => q.symbol && (q.symbol.endsWith('.NS')||q.symbol.endsWith('.BO'))) || quotes[0];
-            if (preferred) selectSymbol({ symbol: preferred.symbol, name: preferred.longname || preferred.shortname || preferred.symbol });
-            else alert('No result');
-          } catch(err){ alert('Search failed.'); console.error(err); }
-        })();
-      }
-    }
-  });
-
-  // Small helper to register service worker (PWA offline)
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw-buffett-pwa.js').catch(e => {
-      // as fallback, try to register the SW inlined below by creating a blob
-      console.warn('Failed to register external SW, will try inlined fallback.', e);
-      registerInlineSw();
-    });
-  }
-
-  // Inlined service worker as fallback (in same file). We'll create a blob and register it.
-  function registerInlineSw(){
-    const swCode = `
-      const CACHE = 'buffett-pwa-v1';
-      const OFFLINE = [
-        '/',
-      ];
-      self.addEventListener('install', (e)=> {
-        self.skipWaiting();
-        e.waitUntil(caches.open(CACHE).then(c=> c.addAll(OFFLINE)).catch(()=>{}));
-      });
-      self.addEventListener('activate', (e)=> { self.clients.claim(); });
-      self.addEventListener('fetch', (e)=> {
-        const url = new URL(e.request.url);
-        // cache-first for app shell
-        if (e.request.method !== 'GET') return;
-        if (url.origin === location.origin && (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))) {
-          e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(resp => { caches.open(CACHE).then(c=>c.put(e.request, resp.clone())); return resp; }).catch(()=>caches.match('/'))));
-          return;
-        }
-        // For API requests, network-first then cache
-        if (url.hostname.includes('query2.finance.yahoo.com') || url.hostname.includes('api.allorigins.win')) {
-          e.respondWith(fetch(e.request).then(resp => { const copy = resp.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return resp; }).catch(()=> caches.match(e.request) ));
-          return;
-        }
-      });
-    `;
-    const blob = new Blob([swCode], {type:'application/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).catch(err => console.warn('Inline SW reg failed', err));
-  }
-
-  // separate tiny external SW file (to improve caching on some hosts)
-  // We'll try to serve it by creating a blob and then offering it at ./sw-buffett-pwa.js via fetch interception - but simpler: create a blob and dynamically register above.
-  // If external registration failed earlier we already call registerInlineSw()
-
-  // Add simple manifest injection so "Add to Home Screen" shows proper name/icon
-  (function injectManifest(){
-    const manifest = {
-      name: "Buffett-Style Stock Analyst",
-      short_name: "BuffettAnalyst",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#071021",
-      theme_color: "#0ea5e9",
-      icons: [
-        { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Crect rx='34' width='100%25' height='100%25' fill='%2306b6d4'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='96' font-family='Arial' fill='%23001212'%3EB%3C/text%3E%3C/svg%3E", sizes:"192x192", type:"image/svg+xml" }
-      ]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    let link = document.querySelector('link[rel="manifest"]');
-    if (link) link.href = url;
-    else {
-      link = document.createElement('link'); link.rel='manifest'; link.href=url; document.head.appendChild(link);
-    }
-  })();
-
-  // initial load watchlist
-  loadWatchlist();
-
-  // Utility: prevent accidental XSS via comments
-  function safeText(s){ return (s||'').toString(); }
-
-  // end of script
   </script>
 </body>
 </html>
